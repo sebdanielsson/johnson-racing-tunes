@@ -18,12 +18,12 @@ export interface Tune {
 }
 
 // tunes.json is dictionary-encoded to keep the payload small; expand it here.
-// Creators and videos are deduplicated into lookup tables referenced by index.
+// Repeated values are deduplicated into lookup tables referenced by index.
 type PackedRow = [
   string, // gameCode
   string, // class
-  string, // car
-  string, // madeFor
+  number, // car index
+  number, // madeFor index
   number[], // creator indices
   string[], // shareCodes
   string, // info
@@ -34,6 +34,8 @@ type PackedRow = [
 const packed = raw as {
   creators: string[];
   videos: [string, string][]; // [title, url]
+  cars: string[];
+  madeFor: string[];
   rows: PackedRow[];
 };
 
@@ -58,7 +60,7 @@ const CLASS_ORDER_MAP: Record<string, number> = {
 };
 
 export const tunes: Tune[] = packed.rows.map((row, i) => {
-  const [code, cls, car, madeFor, creatorIdx, shareCodes, info, vIdx, isNew] =
+  const [code, cls, carIdx, mfIdx, creatorIdx, shareCodes, info, vIdx, isNew] =
     row;
   const game = GAME_BY_CODE[code] ?? { name: code, order: 99 };
   const video = vIdx >= 0 ? packed.videos[vIdx] : undefined;
@@ -69,8 +71,8 @@ export const tunes: Tune[] = packed.rows.map((row, i) => {
     gameOrder: game.order,
     class: cls,
     classOrder: CLASS_ORDER_MAP[cls] ?? 50,
-    car,
-    madeFor,
+    car: packed.cars[carIdx],
+    madeFor: packed.madeFor[mfIdx],
     creators: creatorIdx.map((ci) => packed.creators[ci]),
     shareCodes,
     info,
