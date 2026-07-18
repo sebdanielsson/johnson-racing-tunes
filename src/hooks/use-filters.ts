@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useSyncExternalStore } from "react";
 
 export type SortField = "car" | "class" | "game" | "creator";
 export type SortDir = "asc" | "desc";
@@ -14,6 +14,7 @@ export interface Filters {
   newOnly: boolean;
   hasVideo: boolean;
   hasCode: boolean;
+  sinceOnly: boolean;
   sort: SortField;
   dir: SortDir;
   view: ViewMode;
@@ -33,6 +34,7 @@ export const DEFAULT_FILTERS: Filters = {
   newOnly: false,
   hasVideo: false,
   hasCode: false,
+  sinceOnly: false,
   sort: "class",
   dir: "asc",
   view: "table",
@@ -56,6 +58,7 @@ function parseFromUrl(): Filters {
   f.newOnly = p.get("new") === "1";
   f.hasVideo = p.get("video") === "1";
   f.hasCode = p.get("code") === "1";
+  f.sinceOnly = p.get("since") === "1";
   if (["car", "class", "game", "creator"].includes(p.get("sort") ?? ""))
     f.sort = p.get("sort") as SortField;
   if (p.get("dir") === "desc") f.dir = "desc";
@@ -80,6 +83,7 @@ function writeToUrl(f: Filters) {
   if (f.newOnly) p.set("new", "1");
   if (f.hasVideo) p.set("video", "1");
   if (f.hasCode) p.set("code", "1");
+  if (f.sinceOnly) p.set("since", "1");
   if (f.sort !== DEFAULT_FILTERS.sort) p.set("sort", f.sort);
   if (f.dir !== DEFAULT_FILTERS.dir) p.set("dir", f.dir);
   if (f.view !== DEFAULT_FILTERS.view) p.set("view", f.view);
@@ -91,23 +95,52 @@ function writeToUrl(f: Filters) {
   window.history.replaceState(null, "", url);
 }
 
+// Shared singleton so the game selector, Browse and Overview all read/write the
+// same URL-synced filter state.
+let filters = parseFromUrl();
+const listeners = new Set<() => void>();
+function emit() {
+  for (const l of listeners) l();
+}
+function commit(next: Filters) {
+  filters = next;
+  writeToUrl(filters);
+  emit();
+}
+
+export const filtersStore = {
+  subscribe(listener: () => void) {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  },
+  getSnapshot() {
+    return filters;
+  },
+  /** Merge a patch; any change other than page itself resets to page 1. */
+  update(patch: Partial<Filters>) {
+    const next = { ...filters, ...patch };
+    if (!("page" in patch)) next.page = 1;
+    commit(next);
+  },
+  reset() {
+    commit({ ...DEFAULT_FILTERS, view: filters.view });
+  },
+  /** Open/close a tune without disturbing pagination. */
+  setTune(id: string | null) {
+    commit({ ...filters, tune: id });
+  },
+};
+
 export function useFilters() {
-  const [filters, setFilters] = React.useState<Filters>(parseFromUrl);
-
-  React.useEffect(() => {
-    writeToUrl(filters);
-  }, [filters]);
-
-  // Patch filters; any change other than page itself resets to page 1.
-  const update = React.useCallback((patch: Partial<Filters>) => {
-    setFilters((prev) => {
-      const next = { ...prev, ...patch };
-      if (!("page" in patch)) next.page = 1;
-      return next;
-    });
-  }, []);
-
-  const reset = React.useCallback(() => setFilters({ ...DEFAULT_FILTERS }), []);
-
-  return { filters, update, reset, setFilters };
+  const snapshot = useSyncExternalStore(
+    filtersStore.subscribe,
+    filtersStore.getSnapshot,
+    () => filters,
+  );
+  return {
+    filters: snapshot,
+    update: filtersStore.update,
+    reset: filtersStore.reset,
+    setTune: filtersStore.setTune,
+  };
 }

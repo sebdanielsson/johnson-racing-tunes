@@ -23,233 +23,269 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { byClass, byFocus, byGame, topCreators } from "@/lib/aggregations";
+import { applyFilters } from "@/lib/filtering";
 import { gameColorVar } from "@/lib/constants";
 import { gameShort } from "@/data/tunes";
 import { useData } from "@/data/store";
+import { useFilters } from "@/hooks/use-filters";
+import { useFavorites } from "@/hooks/use-favorites";
 
-const axisTick = {
-  fill: "var(--muted-foreground)",
-  fontSize: 12,
-} as const;
-
+const axisTick = { fill: "var(--muted-foreground)", fontSize: 12 } as const;
 const singleConfig = {
   value: { label: "Tunes", color: "var(--chart-1)" },
 } satisfies ChartConfig;
-
-const gameConfig = {
-  value: { label: "Tunes" },
-} satisfies ChartConfig;
+const gameConfig = { value: { label: "Tunes" } } satisfies ChartConfig;
 
 export function OverviewCharts() {
   const { tunes } = useData();
+  const { filters } = useFilters();
+  const favorites = useFavorites();
+
+  const results = React.useMemo(
+    () => applyFilters(filters, favorites, tunes),
+    [filters, favorites, tunes],
+  );
+  const filtered = results.length !== tunes.length;
+
   const gameData = React.useMemo(
     () =>
-      byGame(tunes).map((d) => ({
+      byGame(results).map((d) => ({
         ...d,
         short: gameShort[d.name] ?? d.name,
         fill: gameColorVar[d.name] ?? "var(--chart-1)",
       })),
-    [tunes],
+    [results],
   );
-  const classData = React.useMemo(() => byClass(tunes), [tunes]);
-  const creatorData = React.useMemo(() => topCreators(tunes, 12), [tunes]);
-  const focusData = React.useMemo(() => byFocus(tunes), [tunes]);
+  const classData = React.useMemo(() => byClass(results), [results]);
+  const creatorData = React.useMemo(() => topCreators(results, 12), [results]);
+  const focusData = React.useMemo(() => byFocus(results), [results]);
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      {/* Tunes by game — categorical colour per game */}
-      <Card className="min-w-0">
-        <CardHeader>
-          <CardTitle>Tunes by game</CardTitle>
-          <CardDescription>
-            Coverage across the Forza titles in the database
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer
-            config={gameConfig}
-            className="h-[260px] w-full min-w-0"
+    <div className="flex flex-col gap-4">
+      <p className="text-sm text-muted-foreground">
+        {filtered ? (
+          <>
+            Charts reflect your current filters —{" "}
+            <span className="font-medium text-foreground tabular-nums">
+              {results.length.toLocaleString()}
+            </span>{" "}
+            matching {results.length === 1 ? "tune" : "tunes"}.
+          </>
+        ) : (
+          <>Showing all {results.length.toLocaleString()} tunes in the database.</>
+        )}
+      </p>
+
+      {results.length === 0 ? (
+        <div className="rounded-xl border border-dashed py-20 text-center text-muted-foreground">
+          No tunes match your filters — adjust them to see the breakdown.
+        </div>
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <ChartCard
+            title="Tunes by game"
+            description="Coverage across the Forza titles"
+            data={gameData}
           >
-            <BarChart
-              accessibilityLayer
-              data={gameData}
-              margin={{ top: 24, right: 8, left: 8, bottom: 0 }}
-            >
-              <CartesianGrid vertical={false} stroke="var(--border)" />
-              <XAxis
-                dataKey="short"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                tick={axisTick}
-              />
-              <ChartTooltip
-                cursor={{ fill: "var(--muted)", opacity: 0.4 }}
-                content={
-                  <ChartTooltipContent
-                    hideIndicator
-                    labelFormatter={(_, p) => p?.[0]?.payload?.name ?? ""}
+            <ChartContainer config={gameConfig} className="h-[260px] w-full min-w-0">
+              <BarChart
+                accessibilityLayer
+                data={gameData}
+                margin={{ top: 24, right: 8, left: 8, bottom: 0 }}
+              >
+                <CartesianGrid vertical={false} stroke="var(--border)" />
+                <XAxis
+                  dataKey="short"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tick={axisTick}
+                />
+                <ChartTooltip
+                  cursor={{ fill: "var(--muted)", opacity: 0.4 }}
+                  content={
+                    <ChartTooltipContent
+                      hideIndicator
+                      labelFormatter={(_, p) => p?.[0]?.payload?.name ?? ""}
+                    />
+                  }
+                />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={72}>
+                  {gameData.map((d) => (
+                    <Cell key={d.name} fill={d.fill} />
+                  ))}
+                  <LabelList
+                    dataKey="value"
+                    position="top"
+                    className="fill-foreground"
+                    fontSize={12}
+                    fontWeight={600}
                   />
-                }
-              />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={72}>
-                {gameData.map((d) => (
-                  <Cell key={d.name} fill={d.fill} />
-                ))}
-                <LabelList
-                  dataKey="value"
-                  position="top"
-                  className="fill-foreground"
-                  fontSize={12}
-                  fontWeight={600}
-                />
-              </Bar>
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+                </Bar>
+              </BarChart>
+            </ChartContainer>
+          </ChartCard>
 
-      {/* Tunes by class — single hue, ordered ladder */}
-      <Card className="min-w-0">
-        <CardHeader>
-          <CardTitle>Tunes by class</CardTitle>
-          <CardDescription>
-            Performance-class ladder (D → R), Horizon titles
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={singleConfig} className="h-[260px] w-full min-w-0">
-            <BarChart
-              accessibilityLayer
-              data={classData}
-              margin={{ top: 24, right: 8, left: 8, bottom: 0 }}
-            >
-              <CartesianGrid vertical={false} stroke="var(--border)" />
-              <XAxis
-                dataKey="name"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                tick={axisTick}
-              />
-              <ChartTooltip
-                cursor={{ fill: "var(--muted)", opacity: 0.4 }}
-                content={<ChartTooltipContent />}
-              />
-              <Bar
-                dataKey="value"
-                fill="var(--color-value)"
-                radius={[4, 4, 0, 0]}
-                maxBarSize={56}
+          <ChartCard
+            title="Tunes by class"
+            description="Performance-class ladder (D → R)"
+            data={classData}
+          >
+            <ChartContainer config={singleConfig} className="h-[260px] w-full min-w-0">
+              <BarChart
+                accessibilityLayer
+                data={classData}
+                margin={{ top: 24, right: 8, left: 8, bottom: 0 }}
               >
-                <LabelList
-                  dataKey="value"
-                  position="top"
-                  className="fill-foreground"
-                  fontSize={12}
-                  fontWeight={600}
+                <CartesianGrid vertical={false} stroke="var(--border)" />
+                <XAxis
+                  dataKey="name"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tick={axisTick}
                 />
-              </Bar>
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+                <ChartTooltip
+                  cursor={{ fill: "var(--muted)", opacity: 0.4 }}
+                  content={<ChartTooltipContent />}
+                />
+                <Bar
+                  dataKey="value"
+                  fill="var(--color-value)"
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={56}
+                >
+                  <LabelList
+                    dataKey="value"
+                    position="top"
+                    className="fill-foreground"
+                    fontSize={12}
+                    fontWeight={600}
+                  />
+                </Bar>
+              </BarChart>
+            </ChartContainer>
+          </ChartCard>
 
-      {/* Top creators — horizontal single hue */}
-      <Card className="min-w-0">
-        <CardHeader>
-          <CardTitle>Top creators</CardTitle>
-          <CardDescription>Most tunes in the database</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={singleConfig} className="h-[360px] w-full min-w-0">
-            <BarChart
-              accessibilityLayer
-              layout="vertical"
-              data={creatorData}
-              margin={{ top: 4, right: 40, left: 8, bottom: 4 }}
-            >
-              <CartesianGrid horizontal={false} stroke="var(--border)" />
-              <XAxis type="number" hide />
-              <YAxis
-                type="category"
-                dataKey="name"
-                tickLine={false}
-                axisLine={false}
-                width={112}
-                tick={axisTick}
-              />
-              <ChartTooltip
-                cursor={{ fill: "var(--muted)", opacity: 0.4 }}
-                content={<ChartTooltipContent />}
-              />
-              <Bar
-                dataKey="value"
-                fill="var(--color-value)"
-                radius={[0, 4, 4, 0]}
-                maxBarSize={22}
+          <ChartCard
+            title="Top creators"
+            description="Most tunes in the current selection"
+            data={creatorData}
+          >
+            <ChartContainer config={singleConfig} className="h-[360px] w-full min-w-0">
+              <BarChart
+                accessibilityLayer
+                layout="vertical"
+                data={creatorData}
+                margin={{ top: 4, right: 40, left: 8, bottom: 4 }}
               >
-                <LabelList
-                  dataKey="value"
-                  position="right"
-                  className="fill-foreground"
-                  fontSize={12}
-                  fontWeight={600}
+                <CartesianGrid horizontal={false} stroke="var(--border)" />
+                <XAxis type="number" hide />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  tickLine={false}
+                  axisLine={false}
+                  width={112}
+                  tick={axisTick}
                 />
-              </Bar>
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+                <ChartTooltip
+                  cursor={{ fill: "var(--muted)", opacity: 0.4 }}
+                  content={<ChartTooltipContent />}
+                />
+                <Bar
+                  dataKey="value"
+                  fill="var(--color-value)"
+                  radius={[0, 4, 4, 0]}
+                  maxBarSize={22}
+                >
+                  <LabelList
+                    dataKey="value"
+                    position="right"
+                    className="fill-foreground"
+                    fontSize={12}
+                    fontWeight={600}
+                  />
+                </Bar>
+              </BarChart>
+            </ChartContainer>
+          </ChartCard>
 
-      {/* Tune focus — horizontal single hue */}
-      <Card className="min-w-0">
-        <CardHeader>
-          <CardTitle>Tune focus</CardTitle>
-          <CardDescription>
-            What builds are made for (tunes may span several)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={singleConfig} className="h-[360px] w-full min-w-0">
-            <BarChart
-              accessibilityLayer
-              layout="vertical"
-              data={focusData}
-              margin={{ top: 4, right: 40, left: 8, bottom: 4 }}
-            >
-              <CartesianGrid horizontal={false} stroke="var(--border)" />
-              <XAxis type="number" hide />
-              <YAxis
-                type="category"
-                dataKey="name"
-                tickLine={false}
-                axisLine={false}
-                width={104}
-                tick={axisTick}
-              />
-              <ChartTooltip
-                cursor={{ fill: "var(--muted)", opacity: 0.4 }}
-                content={<ChartTooltipContent />}
-              />
-              <Bar
-                dataKey="value"
-                fill="var(--color-value)"
-                radius={[0, 4, 4, 0]}
-                maxBarSize={22}
+          <ChartCard
+            title="Tune focus"
+            description="What builds are made for (tunes may span several)"
+            data={focusData}
+          >
+            <ChartContainer config={singleConfig} className="h-[360px] w-full min-w-0">
+              <BarChart
+                accessibilityLayer
+                layout="vertical"
+                data={focusData}
+                margin={{ top: 4, right: 40, left: 8, bottom: 4 }}
               >
-                <LabelList
-                  dataKey="value"
-                  position="right"
-                  className="fill-foreground"
-                  fontSize={12}
-                  fontWeight={600}
+                <CartesianGrid horizontal={false} stroke="var(--border)" />
+                <XAxis type="number" hide />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  tickLine={false}
+                  axisLine={false}
+                  width={104}
+                  tick={axisTick}
                 />
-              </Bar>
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+                <ChartTooltip
+                  cursor={{ fill: "var(--muted)", opacity: 0.4 }}
+                  content={<ChartTooltipContent />}
+                />
+                <Bar
+                  dataKey="value"
+                  fill="var(--color-value)"
+                  radius={[0, 4, 4, 0]}
+                  maxBarSize={22}
+                >
+                  <LabelList
+                    dataKey="value"
+                    position="right"
+                    className="fill-foreground"
+                    fontSize={12}
+                    fontWeight={600}
+                  />
+                </Bar>
+              </BarChart>
+            </ChartContainer>
+          </ChartCard>
+        </div>
+      )}
     </div>
+  );
+}
+
+function ChartCard({
+  title,
+  description,
+  data,
+  children,
+}: {
+  title: string;
+  description: string;
+  data: unknown[];
+  children: React.ReactNode;
+}) {
+  return (
+    <Card className="min-w-0">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {data.length ? (
+          children
+        ) : (
+          <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
+            Not enough data for this selection.
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

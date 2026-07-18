@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { YoutubeIcon } from "@/components/app/brand-icons";
 import { SiteHeader } from "@/components/app/site-header";
 import { StatTiles } from "@/components/app/stat-tiles";
+import { GameSwitcher } from "@/components/app/game-switcher";
 import { TuneBrowser } from "@/components/app/tune-browser";
 import { CHANNEL_URL, SHEET_URL } from "@/lib/constants";
 import { useData } from "@/data/store";
@@ -71,6 +72,11 @@ function App() {
             <StatTiles />
           </div>
         </section>
+
+        {/* Game selector — scopes both Browse and Overview */}
+        <div className="mb-6">
+          <GameSwitcher />
+        </div>
 
         {/* Content */}
         <Tabs defaultValue="browse" className="gap-6">
