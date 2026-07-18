@@ -17,21 +17,25 @@ export interface Tune {
   isNew: boolean;
 }
 
-// tunes.json is stored column-first to keep the payload small; expand it here.
-type CompactRow = [
+// tunes.json is dictionary-encoded to keep the payload small; expand it here.
+// Creators and videos are deduplicated into lookup tables referenced by index.
+type PackedRow = [
   string, // gameCode
   string, // class
   string, // car
   string, // madeFor
-  string[], // creators
+  number[], // creator indices
   string[], // shareCodes
   string, // info
-  string, // videoTitle
-  string, // videoUrl
+  number, // video index (-1 = none)
   number, // isNew (0/1)
 ];
 
-const compact = raw as { f: string[]; r: CompactRow[] };
+const packed = raw as {
+  creators: string[];
+  videos: [string, string][]; // [title, url]
+  rows: PackedRow[];
+};
 
 const GAME_BY_CODE: Record<string, { name: string; order: number }> = {
   FH6: { name: "Forza Horizon 6", order: 0 },
@@ -53,10 +57,11 @@ const CLASS_ORDER_MAP: Record<string, number> = {
   P: 8,
 };
 
-export const tunes: Tune[] = compact.r.map((row, i) => {
-  const [code, cls, car, madeFor, creators, shareCodes, info, vt, vu, isNew] =
+export const tunes: Tune[] = packed.rows.map((row, i) => {
+  const [code, cls, car, madeFor, creatorIdx, shareCodes, info, vIdx, isNew] =
     row;
   const game = GAME_BY_CODE[code] ?? { name: code, order: 99 };
+  const video = vIdx >= 0 ? packed.videos[vIdx] : undefined;
   return {
     id: `${code}-${i + 1}`,
     game: game.name,
@@ -66,11 +71,11 @@ export const tunes: Tune[] = compact.r.map((row, i) => {
     classOrder: CLASS_ORDER_MAP[cls] ?? 50,
     car,
     madeFor,
-    creators,
+    creators: creatorIdx.map((ci) => packed.creators[ci]),
     shareCodes,
     info,
-    videoTitle: vt,
-    videoUrl: vu,
+    videoTitle: video?.[0] ?? "",
+    videoUrl: video?.[1] ?? "",
     isNew: isNew === 1,
   };
 });

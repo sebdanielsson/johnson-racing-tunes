@@ -88,19 +88,27 @@ def fetch_csv(gid: str) -> list[list[str]]:
 
 
 def main() -> None:
-    # Column order the frontend (src/data/tunes.ts) expects.
-    fields = [
-        "game",
-        "class",
-        "car",
-        "madeFor",
-        "creators",
-        "shareCodes",
-        "info",
-        "videoTitle",
-        "videoUrl",
-        "isNew",
-    ]
+    # Dictionary tables (deduplicated) referenced by index from each row.
+    creators: list[str] = []
+    creators_idx: dict[str, int] = {}
+    videos: list[list[str]] = []
+    videos_idx: dict[tuple[str, str], int] = {}
+
+    def creator_index(name: str) -> int:
+        if name not in creators_idx:
+            creators_idx[name] = len(creators)
+            creators.append(name)
+        return creators_idx[name]
+
+    def video_index(title: str, url: str) -> int:
+        key = (title, url)
+        if key not in videos_idx:
+            videos_idx[key] = len(videos)
+            videos.append([title, url])
+        return videos_idx[key]
+
+    # row shape src/data/tunes.ts expects:
+    # [code, class, car, madeFor, creatorIdx[], shareCodes[], info, videoIdx, isNew]
     rows_out = []
     games_seen = Counter()
     for game, (gid, code, _order) in SHEETS.items():
@@ -123,24 +131,26 @@ def main() -> None:
             if g("class"):
                 cur = g("class")
             vu = g("videoUrl")
+            vu = vu if vu.startswith("http") else ""
+            vt = g("videoTitle")
+            crs = split_multi(g("creator")) or ([g("creator")] if g("creator") else [])
             rows_out.append(
                 [
                     code,
                     norm_class(raw),
                     car,
                     g("madeFor"),
-                    split_multi(g("creator")) or ([g("creator")] if g("creator") else []),
+                    [creator_index(x) for x in crs],
                     split_multi(g("share")),
                     g("info"),
-                    g("videoTitle"),
-                    vu if vu.startswith("http") else "",
+                    video_index(vt, vu) if (vt or vu) else -1,
                     1 if g("new") else 0,
                 ]
             )
             games_seen[game] += 1
 
     dest = Path(__file__).resolve().parent.parent / "src" / "data" / "tunes.json"
-    payload = {"f": fields, "r": rows_out}
+    payload = {"creators": creators, "videos": videos, "rows": rows_out}
     dest.write_text(
         json.dumps(payload, ensure_ascii=False, separators=(",", ":")),
         encoding="utf-8",
