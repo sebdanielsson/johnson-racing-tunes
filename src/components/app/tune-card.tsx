@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { CopyCode } from "@/components/app/copy-code";
 import { FavoriteButton } from "@/components/app/favorite-button";
 import { GameBadge } from "@/components/app/game-badge";
+import { newSinceIds } from "@/data/seen";
 import type { Tune } from "@/data/tunes";
 
 export function TuneCard({
@@ -45,7 +46,16 @@ export function TuneCard({
       </div>
 
       <div className="min-w-0">
-        <h3 className="truncate font-semibold">{tune.car}</h3>
+        <h3 className="flex items-center gap-1.5 truncate font-semibold">
+          {newSinceIds.has(tune.id) && (
+            <span
+              className="size-2 shrink-0 rounded-full bg-amber-400"
+              title="New since your last visit"
+              aria-label="New since your last visit"
+            />
+          )}
+          <span className="truncate">{tune.car}</span>
+        </h3>
         <p className="truncate text-xs text-muted-foreground">
           by {tune.creators.join(", ") || "unknown"}
         </p>

@@ -1,5 +1,6 @@
 import type { Tune } from "@/data/tunes";
 import type { Filters, SortField } from "@/hooks/use-filters";
+import { newSinceIds } from "@/data/seen";
 
 export const FOCUS_OPTIONS = [
   "Allround",
@@ -57,6 +58,7 @@ export function applyFilters(
     }
     if (filters.favOnly && !favorites.has(t.id)) return false;
     if (filters.newOnly && !t.isNew) return false;
+    if (filters.sinceOnly && !newSinceIds.has(t.id)) return false;
     if (filters.hasVideo && !t.videoUrl) return false;
     if (filters.hasCode && t.shareCodes.length === 0) return false;
     return true;

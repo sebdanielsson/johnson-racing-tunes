@@ -46,6 +46,7 @@ import { favoritesStore, useFavorites } from "@/hooks/use-favorites";
 import { useFilters, type SortField } from "@/hooks/use-filters";
 import { applyFilters } from "@/lib/filtering";
 import { useData } from "@/data/store";
+import { newSinceCount, newSinceIds } from "@/data/seen";
 import type { Tune } from "@/data/tunes";
 import { cn } from "@/lib/utils";
 
@@ -57,7 +58,7 @@ const SORT_LABELS: Record<SortField, string> = {
 };
 
 export function TuneBrowser() {
-  const { filters, update, reset, setFilters } = useFilters();
+  const { filters, update, reset, setTune } = useFilters();
   const { tunes, filterOptions } = useData();
   const favorites = useFavorites();
   const [copied, setCopied] = React.useState(false);
@@ -69,9 +70,8 @@ export function TuneBrowser() {
     [filters.tune, tunes],
   );
   const setActive = React.useCallback(
-    (tune: Tune | null) =>
-      setFilters((prev) => ({ ...prev, tune: tune ? tune.id : null })),
-    [setFilters],
+    (tune: Tune | null) => setTune(tune ? tune.id : null),
+    [setTune],
   );
 
   // "/" focuses search, Escape blurs it.
@@ -158,12 +158,6 @@ export function TuneBrowser() {
 
         <div className="flex flex-wrap items-center gap-2">
           <MultiSelect
-            label="Game"
-            options={filterOptions.games}
-            selected={filters.games}
-            onChange={(v) => update({ games: v })}
-          />
-          <MultiSelect
             label="Class"
             options={filterOptions.classes}
             selected={filters.classes}
@@ -202,6 +196,20 @@ export function TuneBrowser() {
           >
             New
           </Toggle>
+          {newSinceCount > 0 && (
+            <Toggle
+              active={filters.sinceOnly}
+              onClick={() => update({ sinceOnly: !filters.sinceOnly })}
+              icon={
+                <span
+                  className="size-2 rounded-full bg-amber-400"
+                  aria-hidden="true"
+                />
+              }
+            >
+              New to you ({newSinceCount})
+            </Toggle>
+          )}
           <Toggle
             active={filters.hasVideo}
             onClick={() => update({ hasVideo: !filters.hasVideo })}
@@ -359,6 +367,13 @@ export function TuneBrowser() {
                   <TableCell className="px-3 py-3 align-top">
                     <div className="min-w-[170px] max-w-[280px]">
                       <div className="flex items-center gap-2">
+                        {newSinceIds.has(t.id) && (
+                          <span
+                            className="size-2 shrink-0 rounded-full bg-amber-400"
+                            title="New since your last visit"
+                            aria-label="New since your last visit"
+                          />
+                        )}
                         <span className="font-semibold text-foreground group-hover:text-primary">
                           {t.car}
                         </span>
