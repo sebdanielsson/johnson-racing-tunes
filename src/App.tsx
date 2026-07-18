@@ -8,7 +8,7 @@ import { SiteHeader } from "@/components/app/site-header";
 import { StatTiles } from "@/components/app/stat-tiles";
 import { TuneBrowser } from "@/components/app/tune-browser";
 import { CHANNEL_URL, SHEET_URL } from "@/lib/constants";
-import { games } from "@/data/tunes";
+import { useData } from "@/data/store";
 
 // Recharts is heavy — only load the charts when the Overview tab is opened.
 const OverviewCharts = lazy(() =>
@@ -18,6 +18,7 @@ const OverviewCharts = lazy(() =>
 );
 
 function App() {
+  const { games } = useData();
   return (
     <div className="min-h-screen bg-background">
       <div className="pointer-events-none fixed inset-0 -z-10 bg-grid opacity-60" />

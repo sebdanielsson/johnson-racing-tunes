@@ -1,3 +1,4 @@
+import * as React from "react";
 import {
   Bar,
   BarChart,
@@ -24,15 +25,7 @@ import {
 import { byClass, byFocus, byGame, topCreators } from "@/lib/aggregations";
 import { gameColorVar } from "@/lib/constants";
 import { gameShort } from "@/data/tunes";
-
-const gameData = byGame().map((d) => ({
-  ...d,
-  short: gameShort[d.name] ?? d.name,
-  fill: gameColorVar[d.name] ?? "var(--chart-1)",
-}));
-const classData = byClass();
-const creatorData = topCreators(12);
-const focusData = byFocus();
+import { useData } from "@/data/store";
 
 const axisTick = {
   fill: "var(--muted-foreground)",
@@ -48,10 +41,24 @@ const gameConfig = {
 } satisfies ChartConfig;
 
 export function OverviewCharts() {
+  const { tunes } = useData();
+  const gameData = React.useMemo(
+    () =>
+      byGame(tunes).map((d) => ({
+        ...d,
+        short: gameShort[d.name] ?? d.name,
+        fill: gameColorVar[d.name] ?? "var(--chart-1)",
+      })),
+    [tunes],
+  );
+  const classData = React.useMemo(() => byClass(tunes), [tunes]);
+  const creatorData = React.useMemo(() => topCreators(tunes, 12), [tunes]);
+  const focusData = React.useMemo(() => byFocus(tunes), [tunes]);
+
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       {/* Tunes by game — categorical colour per game */}
-      <Card>
+      <Card className="min-w-0">
         <CardHeader>
           <CardTitle>Tunes by game</CardTitle>
           <CardDescription>
@@ -61,7 +68,7 @@ export function OverviewCharts() {
         <CardContent>
           <ChartContainer
             config={gameConfig}
-            className="h-[260px] w-full"
+            className="h-[260px] w-full min-w-0"
           >
             <BarChart
               accessibilityLayer
@@ -103,7 +110,7 @@ export function OverviewCharts() {
       </Card>
 
       {/* Tunes by class — single hue, ordered ladder */}
-      <Card>
+      <Card className="min-w-0">
         <CardHeader>
           <CardTitle>Tunes by class</CardTitle>
           <CardDescription>
@@ -111,7 +118,7 @@ export function OverviewCharts() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ChartContainer config={singleConfig} className="h-[260px] w-full">
+          <ChartContainer config={singleConfig} className="h-[260px] w-full min-w-0">
             <BarChart
               accessibilityLayer
               data={classData}
@@ -149,16 +156,13 @@ export function OverviewCharts() {
       </Card>
 
       {/* Top creators — horizontal single hue */}
-      <Card>
+      <Card className="min-w-0">
         <CardHeader>
           <CardTitle>Top creators</CardTitle>
           <CardDescription>Most tunes in the database</CardDescription>
         </CardHeader>
         <CardContent>
-          <ChartContainer
-            config={singleConfig}
-            className="h-[360px] w-full"
-          >
+          <ChartContainer config={singleConfig} className="h-[360px] w-full min-w-0">
             <BarChart
               accessibilityLayer
               layout="vertical"
@@ -199,7 +203,7 @@ export function OverviewCharts() {
       </Card>
 
       {/* Tune focus — horizontal single hue */}
-      <Card>
+      <Card className="min-w-0">
         <CardHeader>
           <CardTitle>Tune focus</CardTitle>
           <CardDescription>
@@ -207,10 +211,7 @@ export function OverviewCharts() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ChartContainer
-            config={singleConfig}
-            className="h-[360px] w-full"
-          >
+          <ChartContainer config={singleConfig} className="h-[360px] w-full min-w-0">
             <BarChart
               accessibilityLayer
               layout="vertical"

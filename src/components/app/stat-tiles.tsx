@@ -2,7 +2,7 @@ import { Car, Gamepad2, Users, KeyRound, Clapperboard } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
-import { stats } from "@/data/tunes";
+import { useData } from "@/data/store";
 
 interface Tile {
   label: string;
@@ -10,15 +10,16 @@ interface Tile {
   icon: LucideIcon;
 }
 
-const tiles: Tile[] = [
-  { label: "Tunes", value: stats.total, icon: Car },
-  { label: "Games", value: stats.games, icon: Gamepad2 },
-  { label: "Creators", value: stats.creators, icon: Users },
-  { label: "Share codes", value: stats.shareCodes, icon: KeyRound },
-  { label: "Featured videos", value: stats.videos, icon: Clapperboard },
-];
-
 export function StatTiles() {
+  const { stats } = useData();
+  const tiles: Tile[] = [
+    { label: "Tunes", value: stats.total, icon: Car },
+    { label: "Games", value: stats.games, icon: Gamepad2 },
+    { label: "Creators", value: stats.creators, icon: Users },
+    { label: "Share codes", value: stats.shareCodes, icon: KeyRound },
+    { label: "Featured videos", value: stats.videos, icon: Clapperboard },
+  ];
+
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       {tiles.map((t) => (

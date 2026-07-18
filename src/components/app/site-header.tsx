@@ -3,6 +3,7 @@ import { Table2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GithubIcon, YoutubeIcon } from "@/components/app/brand-icons";
 import { Logo } from "@/components/app/logo";
+import { RefreshButton } from "@/components/app/refresh-button";
 import { ThemeToggle } from "@/components/app/theme-toggle";
 import { CHANNEL_URL, SHEET_URL } from "@/lib/constants";
 
@@ -21,6 +22,7 @@ export function SiteHeader() {
         </div>
 
         <div className="ml-auto flex items-center gap-1">
+          <RefreshButton />
           <Button
             variant="ghost"
             size="icon"

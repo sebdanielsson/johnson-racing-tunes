@@ -11,4 +11,16 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    // Same-origin proxy to Google Sheets in dev (bypasses CORS). In production
+    // the equivalent rewrite lives in vercel.json.
+    proxy: {
+      "/sheets": {
+        target: "https://docs.google.com",
+        changeOrigin: true,
+        secure: true,
+        rewrite: (p) => p.replace(/^\/sheets/, ""),
+      },
+    },
+  },
 });

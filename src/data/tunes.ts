@@ -48,18 +48,11 @@ const GAME_BY_CODE: Record<string, { name: string; order: number }> = {
 };
 
 const CLASS_ORDER_MAP: Record<string, number> = {
-  D: 0,
-  C: 1,
-  B: 2,
-  A: 3,
-  S1: 4,
-  S2: 5,
-  X: 6,
-  R: 7,
-  P: 8,
+  D: 0, C: 1, B: 2, A: 3, S1: 4, S2: 5, X: 6, R: 7, P: 8,
 };
 
-export const tunes: Tune[] = packed.rows.map((row, i) => {
+/** The dataset baked at build time — used as the instant, offline-safe seed. */
+export const initialTunes: Tune[] = packed.rows.map((row, i) => {
   const [code, cls, carIdx, mfIdx, creatorIdx, shareCodes, info, vIdx, isNew] =
     row;
   const game = GAME_BY_CODE[code] ?? { name: code, order: 99 };
@@ -82,17 +75,6 @@ export const tunes: Tune[] = packed.rows.map((row, i) => {
   };
 });
 
-/** Games in display order (as they appear in the source). */
-export const games = [...new Set(tunes.map((t) => t.game))].sort(
-  (a, b) =>
-    (tunes.find((t) => t.game === a)?.gameOrder ?? 0) -
-    (tunes.find((t) => t.game === b)?.gameOrder ?? 0),
-);
-
-export const gameCodeByName: Record<string, string> = Object.fromEntries(
-  tunes.map((t) => [t.game, t.gameCode]),
-);
-
 /** Short label used on badges / compact UI. */
 export const gameShort: Record<string, string> = {
   "Forza Horizon 6": "FH6",
@@ -105,7 +87,7 @@ export const gameShort: Record<string, string> = {
 /** Canonical performance-class ordering for the letter classes. */
 const LETTER_CLASSES = ["D", "C", "B", "A", "S1", "S2", "X", "R", "P"];
 
-export function sortedClasses(subset: Tune[] = tunes): string[] {
+export function sortedClasses(subset: Tune[]): string[] {
   const present = [...new Set(subset.map((t) => t.class))];
   return present.sort((a, b) => {
     const ia = LETTER_CLASSES.indexOf(a);
@@ -120,22 +102,3 @@ export function sortedClasses(subset: Tune[] = tunes): string[] {
 export function isLetterClass(c: string): boolean {
   return LETTER_CLASSES.includes(c);
 }
-
-export const allCreators = [
-  ...new Set(tunes.flatMap((t) => t.creators)),
-].sort((a, b) => a.localeCompare(b));
-
-/** Primary "made for" tag, taking the first segment before a slash / dash join. */
-export function primaryMadeFor(madeFor: string): string {
-  if (!madeFor) return "Other";
-  const first = madeFor.split(/[\n]/)[0].trim();
-  return first || "Other";
-}
-
-export const stats = {
-  total: tunes.length,
-  games: games.length,
-  creators: allCreators.length,
-  videos: new Set(tunes.filter((t) => t.videoUrl).map((t) => t.videoUrl)).size,
-  shareCodes: tunes.reduce((n, t) => n + t.shareCodes.length, 0),
-};
