@@ -88,9 +88,22 @@ def fetch_csv(gid: str) -> list[list[str]]:
 
 
 def main() -> None:
-    out = []
-    idc = 0
-    for game, (gid, code, order) in SHEETS.items():
+    # Column order the frontend (src/data/tunes.ts) expects.
+    fields = [
+        "game",
+        "class",
+        "car",
+        "madeFor",
+        "creators",
+        "shareCodes",
+        "info",
+        "videoTitle",
+        "videoUrl",
+        "isNew",
+    ]
+    rows_out = []
+    games_seen = Counter()
+    for game, (gid, code, _order) in SHEETS.items():
         rows = fetch_csv(gid)
         hi = find_header(rows)
         m = colmap(rows[hi])
@@ -109,32 +122,31 @@ def main() -> None:
                 continue
             if g("class"):
                 cur = g("class")
-            cls = norm_class(raw)
             vu = g("videoUrl")
-            idc += 1
-            out.append(
-                {
-                    "id": f"{code}-{idc}",
-                    "game": game,
-                    "gameCode": code,
-                    "gameOrder": order,
-                    "class": cls,
-                    "classOrder": CLASS_ORDER.get(cls, 50),
-                    "car": car,
-                    "madeFor": g("madeFor"),
-                    "creators": split_multi(g("creator")) or ([g("creator")] if g("creator") else []),
-                    "shareCodes": split_multi(g("share")),
-                    "info": g("info"),
-                    "videoTitle": g("videoTitle"),
-                    "videoUrl": vu if vu.startswith("http") else "",
-                    "isNew": bool(g("new")),
-                }
+            rows_out.append(
+                [
+                    code,
+                    norm_class(raw),
+                    car,
+                    g("madeFor"),
+                    split_multi(g("creator")) or ([g("creator")] if g("creator") else []),
+                    split_multi(g("share")),
+                    g("info"),
+                    g("videoTitle"),
+                    vu if vu.startswith("http") else "",
+                    1 if g("new") else 0,
+                ]
             )
+            games_seen[game] += 1
 
     dest = Path(__file__).resolve().parent.parent / "src" / "data" / "tunes.json"
-    dest.write_text(json.dumps(out, indent=0, ensure_ascii=False), encoding="utf-8")
-    print(f"Wrote {len(out)} tunes to {dest}")
-    print("By game:", dict(Counter(t["game"] for t in out)))
+    payload = {"f": fields, "r": rows_out}
+    dest.write_text(
+        json.dumps(payload, ensure_ascii=False, separators=(",", ":")),
+        encoding="utf-8",
+    )
+    print(f"Wrote {len(rows_out)} tunes to {dest}")
+    print("By game:", dict(games_seen))
 
 
 if __name__ == "__main__":

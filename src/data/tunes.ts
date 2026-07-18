@@ -17,7 +17,63 @@ export interface Tune {
   isNew: boolean;
 }
 
-export const tunes = raw as Tune[];
+// tunes.json is stored column-first to keep the payload small; expand it here.
+type CompactRow = [
+  string, // gameCode
+  string, // class
+  string, // car
+  string, // madeFor
+  string[], // creators
+  string[], // shareCodes
+  string, // info
+  string, // videoTitle
+  string, // videoUrl
+  number, // isNew (0/1)
+];
+
+const compact = raw as { f: string[]; r: CompactRow[] };
+
+const GAME_BY_CODE: Record<string, { name: string; order: number }> = {
+  FH6: { name: "Forza Horizon 6", order: 0 },
+  FH5: { name: "Forza Horizon 5", order: 1 },
+  FH4: { name: "Forza Horizon 4", order: 2 },
+  FH3: { name: "Forza Horizon 3", order: 3 },
+  FM7: { name: "Forza Motorsport 7", order: 4 },
+};
+
+const CLASS_ORDER_MAP: Record<string, number> = {
+  D: 0,
+  C: 1,
+  B: 2,
+  A: 3,
+  S1: 4,
+  S2: 5,
+  X: 6,
+  R: 7,
+  P: 8,
+};
+
+export const tunes: Tune[] = compact.r.map((row, i) => {
+  const [code, cls, car, madeFor, creators, shareCodes, info, vt, vu, isNew] =
+    row;
+  const game = GAME_BY_CODE[code] ?? { name: code, order: 99 };
+  return {
+    id: `${code}-${i + 1}`,
+    game: game.name,
+    gameCode: code,
+    gameOrder: game.order,
+    class: cls,
+    classOrder: CLASS_ORDER_MAP[cls] ?? 50,
+    car,
+    madeFor,
+    creators,
+    shareCodes,
+    info,
+    videoTitle: vt,
+    videoUrl: vu,
+    isNew: isNew === 1,
+  };
+});
 
 /** Games in display order (as they appear in the source). */
 export const games = [...new Set(tunes.map((t) => t.game))].sort(
