@@ -38,12 +38,21 @@ pnpm typecheck  # type-check the project
 
 ## Data
 
-The dataset lives in [`src/data/tunes.json`](src/data/tunes.json), normalized from
-the five sheets of the source spreadsheet into a single typed shape (see
-[`src/data/tunes.ts`](src/data/tunes.ts)). To refresh it, re-export the sheets and
-re-run the normalizer.
+The dataset lives in [`src/data/tunes.json`](src/data/tunes.json), a compact,
+dictionary-encoded snapshot of the five source sheets that
+[`src/data/tunes.ts`](src/data/tunes.ts) expands into typed records at runtime.
+
+Refresh it from the live spreadsheet with:
+
+```bash
+pnpm fetch-data     # re-download the sheets and rewrite src/data/tunes.json
+```
+
+The Vercel deploy runs this automatically at build time (`pnpm build:fresh`), so
+the deployed data always reflects the current sheet.
 
 ## Deployment
 
-Deployed on [Vercel](https://vercel.com) — a static build (`pnpm build`, output
-`dist/`), zero server runtime. Push to the default branch to trigger a deploy.
+Deployed on [Vercel](https://vercel.com) — a static build, zero server runtime.
+The build command is `pnpm build:fresh`, which re-fetches the data and then runs
+`vite build` (output `dist/`).

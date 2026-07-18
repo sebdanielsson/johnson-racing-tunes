@@ -57,6 +57,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^6.0.3
         version: 6.0.3(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0))
+      csv-parse:
+        specifier: ^7.0.1
+        version: 7.0.1
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -702,6 +705,9 @@ packages:
 
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+
+  csv-parse@7.0.1:
+    resolution: {integrity: sha512-+2z7Ar0APQ7Uu6fX4cn+pitRmxjZ1WPBcGmZFKmA74FCyi7Et/XZx8cjNQ5CjbZ4HCOxXCOpRBYvYH08Qa003A==}
 
   d3-array@3.2.4:
     resolution: {integrity: sha512-tdQAmyA18i4J7wprpYq8ClcxZy3SC31QMeByyCFyRt7BVHdREQZ5lpzoe5mFEYZUWe+oq8HBvk9JjpibyEV4Jg==}
@@ -1611,6 +1617,8 @@ snapshots:
   clsx@2.1.1: {}
 
   csstype@3.2.3: {}
+
+  csv-parse@7.0.1: {}
 
   d3-array@3.2.4:
     dependencies:
