@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Browse Johnson Racing Tunes — Forza car tune share codes across Horizon 6, 5, 4, 3 and Motorsport 7. Search, filter and copy the best community tunes."
+    />
+    <meta name="theme-color" content="#0a0a0b" />
+    <meta property="og:title" content="Johnson Racing Tunes" />
+    <meta
+      property="og:description"
+      content="Search and copy the best Forza tune share codes across every game."
+    />
+    <meta property="og:type" content="website" />
+    <title>Johnson Racing Tunes — Forza Tune Share Codes</title>
+    <script>
+      // Apply the saved theme before paint to avoid a flash. Dark is default.
+      (function () {
+        try {
+          var t = localStorage.getItem("jrt-theme");
+          var dark = t ? t === "dark" : true;
+          document.documentElement.classList.toggle("dark", dark);
+          document.documentElement.style.colorScheme = dark ? "dark" : "light";
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
