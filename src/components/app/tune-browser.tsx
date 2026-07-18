@@ -216,14 +216,14 @@ export function TuneBrowser() {
             onClick={() => update({ hasVideo: !filters.hasVideo })}
             icon={<Video className="size-3.5" />}
           >
-            Has video
+            Video
           </Toggle>
           <Toggle
             active={filters.hasCode}
             onClick={() => update({ hasCode: !filters.hasCode })}
             icon={<KeyRound className="size-3.5" />}
           >
-            Has code
+            Share code
           </Toggle>
         </div>
 
