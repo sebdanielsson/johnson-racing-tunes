@@ -352,9 +352,9 @@ export function TuneBrowser() {
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead className="w-8 px-3"></TableHead>
+                <SortableHead field="class" label="Class" />
                 <SortableHead field="car" label="Car" />
                 <SortableHead field="game" label="Game" />
-                <SortableHead field="class" label="Class" />
                 <TableHead className="px-3">Made for</TableHead>
                 <SortableHead field="creator" label="Creator" />
                 <TableHead className="px-3">Share code</TableHead>
@@ -370,6 +370,11 @@ export function TuneBrowser() {
                 >
                   <TableCell className="px-3 py-3">
                     <FavoriteButton id={t.id} />
+                  </TableCell>
+                  <TableCell className="px-3 py-3">
+                    <Badge variant="outline" className="font-semibold">
+                      {t.class}
+                    </Badge>
                   </TableCell>
                   <TableCell className="px-3 py-3 align-top">
                     <div className="min-w-[170px] max-w-[280px]">
@@ -399,11 +404,6 @@ export function TuneBrowser() {
                   </TableCell>
                   <TableCell className="px-3 py-3">
                     <GameBadge game={t.game} />
-                  </TableCell>
-                  <TableCell className="px-3 py-3">
-                    <Badge variant="outline" className="font-semibold">
-                      {t.class}
-                    </Badge>
                   </TableCell>
                   <TableCell className="px-3 py-3">
                     <div className="flex max-w-[200px] flex-wrap gap-1">
