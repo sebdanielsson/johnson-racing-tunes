@@ -27,11 +27,15 @@ function matchesQuery(t: Tune, q: string): boolean {
 }
 
 const comparators: Record<SortField, (a: Tune, b: Tune) => number> = {
-  car: (a, b) => a.car.localeCompare(b.car),
   class: (a, b) => a.classOrder - b.classOrder || a.car.localeCompare(b.car),
-  game: (a, b) => a.gameOrder - b.gameOrder || a.classOrder - b.classOrder,
+  car: (a, b) => a.car.localeCompare(b.car) || a.classOrder - b.classOrder,
+  game: (a, b) =>
+    a.gameOrder - b.gameOrder ||
+    a.classOrder - b.classOrder ||
+    a.car.localeCompare(b.car),
   creator: (a, b) =>
     (a.creators[0] ?? "").localeCompare(b.creators[0] ?? "") ||
+    a.classOrder - b.classOrder ||
     a.car.localeCompare(b.car),
 };
 

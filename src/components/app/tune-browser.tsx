@@ -1,10 +1,11 @@
 import * as React from "react";
 import {
-  ArrowDownAZ,
-  ArrowUpAZ,
+  ArrowDown,
+  ArrowUp,
   Check,
   ChevronLeft,
   ChevronRight,
+  ChevronsUpDown,
   ClipboardCopy,
   ExternalLink,
   LayoutGrid,
@@ -227,36 +228,42 @@ export function TuneBrowser() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Select
-            value={filters.sort}
-            onValueChange={(v) => update({ sort: v as SortField })}
-          >
-            <SelectTrigger size="sm" className="w-[130px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {(Object.keys(SORT_LABELS) as SortField[]).map((k) => (
-                <SelectItem key={k} value={k}>
-                  Sort: {SORT_LABELS[k]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            variant="outline"
-            size="icon"
-            className="size-8"
-            title={filters.dir === "asc" ? "Ascending" : "Descending"}
-            onClick={() =>
-              update({ dir: filters.dir === "asc" ? "desc" : "asc" })
-            }
-          >
-            {filters.dir === "asc" ? (
-              <ArrowDownAZ className="size-4" />
-            ) : (
-              <ArrowUpAZ className="size-4" />
-            )}
-          </Button>
+          {/* In the table, headers drive sorting. Cards can't be clicked to
+              sort, so they keep a compact sort control. */}
+          {filters.view === "cards" && (
+            <>
+              <Select
+                value={filters.sort}
+                onValueChange={(v) => update({ sort: v as SortField })}
+              >
+                <SelectTrigger size="sm" className="w-[130px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(SORT_LABELS) as SortField[]).map((k) => (
+                    <SelectItem key={k} value={k}>
+                      Sort: {SORT_LABELS[k]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8"
+                title={filters.dir === "asc" ? "Ascending" : "Descending"}
+                onClick={() =>
+                  update({ dir: filters.dir === "asc" ? "desc" : "asc" })
+                }
+              >
+                {filters.dir === "asc" ? (
+                  <ArrowUp className="size-4" />
+                ) : (
+                  <ArrowDown className="size-4" />
+                )}
+              </Button>
+            </>
+          )}
           <div className="flex overflow-hidden rounded-md border">
             <ViewButton
               active={filters.view === "table"}
@@ -345,11 +352,11 @@ export function TuneBrowser() {
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead className="w-8 px-3"></TableHead>
-                <TableHead className="px-3">Car</TableHead>
-                <TableHead className="px-3">Game</TableHead>
-                <TableHead className="px-3">Class</TableHead>
+                <SortableHead field="car" label="Car" />
+                <SortableHead field="game" label="Game" />
+                <SortableHead field="class" label="Class" />
                 <TableHead className="px-3">Made for</TableHead>
-                <TableHead className="px-3">Creator</TableHead>
+                <SortableHead field="creator" label="Creator" />
                 <TableHead className="px-3">Share code</TableHead>
                 <TableHead className="px-3">Video</TableHead>
               </TableRow>
@@ -513,6 +520,53 @@ export function TuneBrowser() {
 
       <TuneDetail tune={active} onOpenChange={(o) => !o && setActive(null)} />
     </div>
+  );
+}
+
+function SortableHead({
+  field,
+  label,
+}: {
+  field: SortField;
+  label: string;
+}) {
+  const { filters, update } = useFilters();
+  const active = filters.sort === field;
+  return (
+    <TableHead className="px-3">
+      <button
+        type="button"
+        onClick={() =>
+          update({
+            sort: field,
+            dir: active && filters.dir === "asc" ? "desc" : "asc",
+          })
+        }
+        aria-sort={
+          active
+            ? filters.dir === "asc"
+              ? "ascending"
+              : "descending"
+            : "none"
+        }
+        title={`Sort by ${label.toLowerCase()}`}
+        className={cn(
+          "-mx-1 inline-flex items-center gap-1 rounded px-1 py-1 font-medium transition-colors cursor-pointer hover:text-foreground",
+          active ? "text-foreground" : "text-muted-foreground",
+        )}
+      >
+        {label}
+        {active ? (
+          filters.dir === "asc" ? (
+            <ArrowUp className="size-3.5" />
+          ) : (
+            <ArrowDown className="size-3.5" />
+          )
+        ) : (
+          <ChevronsUpDown className="size-3.5 opacity-40 group-hover:opacity-70" />
+        )}
+      </button>
+    </TableHead>
   );
 }
 
