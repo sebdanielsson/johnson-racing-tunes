@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm build:fresh",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/sheets/:path*",
+      "destination": "https://docs.google.com/:path*"
+    }
+  ]
+}

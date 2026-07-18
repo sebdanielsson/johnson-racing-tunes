@@ -40,16 +40,23 @@ pnpm typecheck  # type-check the project
 
 The dataset lives in [`src/data/tunes.json`](src/data/tunes.json), a compact,
 dictionary-encoded snapshot of the five source sheets that
-[`src/data/tunes.ts`](src/data/tunes.ts) expands into typed records at runtime.
+[`src/data/tunes.ts`](src/data/tunes.ts) expands into typed records — used as the
+instant, offline-safe seed.
 
-Refresh it from the live spreadsheet with:
+Data is refreshed **two ways**:
 
-```bash
-pnpm fetch-data     # re-download the sheets and rewrite src/data/tunes.json
-```
+1. **At build time** — the Vercel deploy runs `pnpm build:fresh`
+   ([`scripts/fetch-data.mjs`](scripts/fetch-data.mjs)) so each deploy bakes in
+   the current sheet. Refresh the local snapshot the same way with `pnpm fetch-data`.
+2. **At runtime** — the in-app **Refresh** button re-fetches and re-parses the
+   sheets live ([`src/data/parse.ts`](src/data/parse.ts)) and swaps the dataset in
+   without a redeploy.
 
-The Vercel deploy runs this automatically at build time (`pnpm build:fresh`), so
-the deployed data always reflects the current sheet.
+Both paths reach Google Sheets through a same-origin proxy that avoids CORS: the
+Vite dev server proxies `/sheets` (see [`vite.config.ts`](vite.config.ts)) and
+Vercel rewrites it in production (see [`vercel.json`](vercel.json)). The
+`gviz/tq?tqx=out:csv` endpoint is used because it returns CSV with a `200` (no
+redirect), so the proxy stays transparent.
 
 ## Deployment
 

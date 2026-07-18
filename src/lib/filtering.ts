@@ -1,4 +1,4 @@
-import { tunes, sortedClasses, type Tune } from "@/data/tunes";
+import type { Tune } from "@/data/tunes";
 import type { Filters, SortField } from "@/hooks/use-filters";
 
 export const FOCUS_OPTIONS = [
@@ -13,38 +13,6 @@ export const FOCUS_OPTIONS = [
   "Offroad",
   "Rally",
 ];
-
-function counted(values: string[]): { value: string; count: number }[] {
-  const map = new Map<string, number>();
-  for (const v of values) map.set(v, (map.get(v) ?? 0) + 1);
-  return [...map.entries()].map(([value, count]) => ({ value, count }));
-}
-
-/** Filter option lists with counts, computed once from the full dataset. */
-export const filterOptions = {
-  games: (() => {
-    const order = new Map(tunes.map((t) => [t.game, t.gameOrder]));
-    return counted(tunes.map((t) => t.game)).sort(
-      (a, b) => (order.get(a.value) ?? 0) - (order.get(b.value) ?? 0),
-    );
-  })(),
-  classes: (() => {
-    const c = counted(tunes.map((t) => t.class));
-    const order = sortedClasses();
-    return c.sort(
-      (a, b) => order.indexOf(a.value) - order.indexOf(b.value),
-    );
-  })(),
-  creators: counted(tunes.flatMap((t) => t.creators)).sort(
-    (a, b) => b.count - a.count || a.value.localeCompare(b.value),
-  ),
-  focus: FOCUS_OPTIONS.map((value) => ({
-    value,
-    count: tunes.filter((t) =>
-      t.madeFor.toLowerCase().includes(value.toLowerCase()),
-    ).length,
-  })).filter((o) => o.count > 0),
-};
 
 function matchesQuery(t: Tune, q: string): boolean {
   return (
@@ -69,9 +37,10 @@ const comparators: Record<SortField, (a: Tune, b: Tune) => number> = {
 export function applyFilters(
   filters: Filters,
   favorites: Set<string>,
+  rows: Tune[],
 ): Tune[] {
   const q = filters.q.trim().toLowerCase();
-  let rows = tunes.filter((t) => {
+  let out = rows.filter((t) => {
     if (q && !matchesQuery(t, q)) return false;
     if (filters.games.length && !filters.games.includes(t.game)) return false;
     if (filters.classes.length && !filters.classes.includes(t.class))
@@ -93,7 +62,7 @@ export function applyFilters(
     return true;
   });
 
-  rows = [...rows].sort(comparators[filters.sort]);
-  if (filters.dir === "desc") rows.reverse();
-  return rows;
+  out = [...out].sort(comparators[filters.sort]);
+  if (filters.dir === "desc") out.reverse();
+  return out;
 }

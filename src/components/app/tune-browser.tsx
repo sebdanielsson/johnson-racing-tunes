@@ -44,8 +44,9 @@ import { TuneCard } from "@/components/app/tune-card";
 import { TuneDetail } from "@/components/app/tune-detail";
 import { favoritesStore, useFavorites } from "@/hooks/use-favorites";
 import { useFilters, type SortField } from "@/hooks/use-filters";
-import { applyFilters, filterOptions } from "@/lib/filtering";
-import { tunes, type Tune } from "@/data/tunes";
+import { applyFilters } from "@/lib/filtering";
+import { useData } from "@/data/store";
+import type { Tune } from "@/data/tunes";
 import { cn } from "@/lib/utils";
 
 const SORT_LABELS: Record<SortField, string> = {
@@ -57,6 +58,7 @@ const SORT_LABELS: Record<SortField, string> = {
 
 export function TuneBrowser() {
   const { filters, update, reset, setFilters } = useFilters();
+  const { tunes, filterOptions } = useData();
   const favorites = useFavorites();
   const [copied, setCopied] = React.useState(false);
   const searchRef = React.useRef<HTMLInputElement>(null);
@@ -64,7 +66,7 @@ export function TuneBrowser() {
   // The opened tune is stored in the URL so a tune is directly shareable.
   const active = React.useMemo(
     () => tunes.find((t) => t.id === filters.tune) ?? null,
-    [filters.tune],
+    [filters.tune, tunes],
   );
   const setActive = React.useCallback(
     (tune: Tune | null) =>
@@ -89,8 +91,8 @@ export function TuneBrowser() {
   }, []);
 
   const results = React.useMemo(
-    () => applyFilters(filters, favorites),
-    [filters, favorites],
+    () => applyFilters(filters, favorites, tunes),
+    [filters, favorites, tunes],
   );
 
   const totalPages = Math.max(1, Math.ceil(results.length / filters.size));
