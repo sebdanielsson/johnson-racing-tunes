@@ -1,0 +1,492 @@
+import * as React from "react";
+import {
+  ArrowDownAZ,
+  ArrowUpAZ,
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  LayoutGrid,
+  Search,
+  Star,
+  Table as TableIcon,
+  Video,
+  KeyRound,
+  Sparkles,
+  X,
+} from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { CopyCode } from "@/components/app/copy-code";
+import { FavoriteButton } from "@/components/app/favorite-button";
+import { GameBadge } from "@/components/app/game-badge";
+import { MultiSelect } from "@/components/app/multi-select";
+import { TuneCard } from "@/components/app/tune-card";
+import { TuneDetail } from "@/components/app/tune-detail";
+import { useFavorites } from "@/hooks/use-favorites";
+import { useFilters, type SortField } from "@/hooks/use-filters";
+import { applyFilters, filterOptions } from "@/lib/filtering";
+import type { Tune } from "@/data/tunes";
+import { cn } from "@/lib/utils";
+
+const SORT_LABELS: Record<SortField, string> = {
+  class: "Class",
+  car: "Car",
+  game: "Game",
+  creator: "Creator",
+};
+
+export function TuneBrowser() {
+  const { filters, update, reset } = useFilters();
+  const favorites = useFavorites();
+  const [active, setActive] = React.useState<Tune | null>(null);
+  const searchRef = React.useRef<HTMLInputElement>(null);
+
+  // "/" focuses search, Escape blurs it.
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (
+        e.key === "/" &&
+        document.activeElement?.tagName !== "INPUT" &&
+        document.activeElement?.tagName !== "TEXTAREA"
+      ) {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const results = React.useMemo(
+    () => applyFilters(filters, favorites),
+    [filters, favorites],
+  );
+
+  const totalPages = Math.max(1, Math.ceil(results.length / filters.size));
+  const page = Math.min(filters.page, totalPages);
+  const start = (page - 1) * filters.size;
+  const pageRows = results.slice(start, start + filters.size);
+
+  const activeFilterCount =
+    filters.games.length +
+    filters.classes.length +
+    filters.focus.length +
+    filters.creators.length +
+    (filters.favOnly ? 1 : 0) +
+    (filters.newOnly ? 1 : 0) +
+    (filters.hasVideo ? 1 : 0) +
+    (filters.hasCode ? 1 : 0) +
+    (filters.q ? 1 : 0);
+
+  const favCount = favorites.size;
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Row 1: search + filters */}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <div className="relative flex-1 lg:max-w-xs">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            ref={searchRef}
+            value={filters.q}
+            onChange={(e) => update({ q: e.target.value })}
+            placeholder="Search car, creator, code…"
+            className="pl-9 pr-8"
+          />
+          {filters.q && (
+            <button
+              type="button"
+              onClick={() => update({ q: "" })}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              aria-label="Clear search"
+            >
+              <X className="size-4" />
+            </button>
+          )}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <MultiSelect
+            label="Game"
+            options={filterOptions.games}
+            selected={filters.games}
+            onChange={(v) => update({ games: v })}
+          />
+          <MultiSelect
+            label="Class"
+            options={filterOptions.classes}
+            selected={filters.classes}
+            onChange={(v) => update({ classes: v })}
+          />
+          <MultiSelect
+            label="Focus"
+            options={filterOptions.focus}
+            selected={filters.focus}
+            onChange={(v) => update({ focus: v })}
+          />
+          <MultiSelect
+            label="Creator"
+            options={filterOptions.creators}
+            selected={filters.creators}
+            onChange={(v) => update({ creators: v })}
+            searchable
+          />
+        </div>
+      </div>
+
+      {/* Row 2: quick toggles + sort/view */}
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          <Toggle
+            active={filters.favOnly}
+            onClick={() => update({ favOnly: !filters.favOnly })}
+            icon={<Star className={cn("size-3.5", filters.favOnly && "fill-current")} />}
+          >
+            Favorites{favCount > 0 && ` (${favCount})`}
+          </Toggle>
+          <Toggle
+            active={filters.newOnly}
+            onClick={() => update({ newOnly: !filters.newOnly })}
+            icon={<Sparkles className="size-3.5" />}
+          >
+            New
+          </Toggle>
+          <Toggle
+            active={filters.hasVideo}
+            onClick={() => update({ hasVideo: !filters.hasVideo })}
+            icon={<Video className="size-3.5" />}
+          >
+            Has video
+          </Toggle>
+          <Toggle
+            active={filters.hasCode}
+            onClick={() => update({ hasCode: !filters.hasCode })}
+            icon={<KeyRound className="size-3.5" />}
+          >
+            Has code
+          </Toggle>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Select
+            value={filters.sort}
+            onValueChange={(v) => update({ sort: v as SortField })}
+          >
+            <SelectTrigger size="sm" className="w-[130px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {(Object.keys(SORT_LABELS) as SortField[]).map((k) => (
+                <SelectItem key={k} value={k}>
+                  Sort: {SORT_LABELS[k]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-8"
+            title={filters.dir === "asc" ? "Ascending" : "Descending"}
+            onClick={() =>
+              update({ dir: filters.dir === "asc" ? "desc" : "asc" })
+            }
+          >
+            {filters.dir === "asc" ? (
+              <ArrowDownAZ className="size-4" />
+            ) : (
+              <ArrowUpAZ className="size-4" />
+            )}
+          </Button>
+          <div className="flex overflow-hidden rounded-md border">
+            <ViewButton
+              active={filters.view === "table"}
+              onClick={() => update({ view: "table" })}
+              title="Table view"
+            >
+              <TableIcon className="size-4" />
+            </ViewButton>
+            <ViewButton
+              active={filters.view === "cards"}
+              onClick={() => update({ view: "cards" })}
+              title="Card view"
+            >
+              <LayoutGrid className="size-4" />
+            </ViewButton>
+          </div>
+        </div>
+      </div>
+
+      {/* Result count + reset */}
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm text-muted-foreground">
+          <span className="font-medium text-foreground tabular-nums">
+            {results.length.toLocaleString()}
+          </span>{" "}
+          {results.length === 1 ? "tune" : "tunes"}
+          {activeFilterCount > 0 ? " match your filters" : " in the database"}
+        </p>
+        {activeFilterCount > 0 && (
+          <Button variant="ghost" size="sm" onClick={reset}>
+            <X className="size-4" />
+            Clear all
+          </Button>
+        )}
+      </div>
+
+      {/* Results */}
+      {results.length === 0 ? (
+        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed py-20 text-center">
+          <Search className="size-8 text-muted-foreground" />
+          <p className="font-medium">No tunes match your filters</p>
+          <p className="text-sm text-muted-foreground">
+            Try removing a filter or searching a different car.
+          </p>
+          <Button variant="outline" size="sm" className="mt-2" onClick={reset}>
+            Clear all filters
+          </Button>
+        </div>
+      ) : filters.view === "cards" ? (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {pageRows.map((t) => (
+            <TuneCard key={t.id} tune={t} onOpen={setActive} />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-xl border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="w-8 px-3"></TableHead>
+                <TableHead className="px-3">Car</TableHead>
+                <TableHead className="px-3">Game</TableHead>
+                <TableHead className="px-3">Class</TableHead>
+                <TableHead className="px-3">Made for</TableHead>
+                <TableHead className="px-3">Creator</TableHead>
+                <TableHead className="px-3">Share code</TableHead>
+                <TableHead className="px-3">Video</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {pageRows.map((t) => (
+                <TableRow
+                  key={t.id}
+                  className="group cursor-pointer align-top"
+                  onClick={() => setActive(t)}
+                >
+                  <TableCell className="px-3 py-3">
+                    <FavoriteButton id={t.id} />
+                  </TableCell>
+                  <TableCell className="px-3 py-3 align-top">
+                    <div className="min-w-[170px] max-w-[280px]">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-foreground group-hover:text-primary">
+                          {t.car}
+                        </span>
+                        {t.isNew && (
+                          <Badge className="h-4 px-1.5 text-[10px] leading-none">
+                            NEW
+                          </Badge>
+                        )}
+                      </div>
+                      {t.info && (
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {t.info}
+                        </p>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="px-3 py-3">
+                    <GameBadge game={t.game} />
+                  </TableCell>
+                  <TableCell className="px-3 py-3">
+                    <Badge variant="outline" className="font-semibold">
+                      {t.class}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="px-3 py-3">
+                    <div className="flex max-w-[200px] flex-wrap gap-1">
+                      {t.madeFor
+                        .split(/[\n/]/)
+                        .map((s) => s.trim())
+                        .filter(Boolean)
+                        .map((tag, i) => (
+                          <span
+                            key={`${tag}-${i}`}
+                            className="rounded bg-secondary px-1.5 py-0.5 text-xs text-secondary-foreground"
+                          >
+                            {tag}
+                          </span>
+                        )) || <span className="text-muted-foreground">—</span>}
+                    </div>
+                  </TableCell>
+                  <TableCell className="px-3 py-3">
+                    <div className="max-w-[150px] text-sm text-muted-foreground">
+                      {t.creators.join(", ") || "—"}
+                    </div>
+                  </TableCell>
+                  <TableCell
+                    className="px-3 py-3"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {t.shareCodes.length ? (
+                      <div className="flex flex-col items-start gap-1">
+                        {t.shareCodes.map((c) => (
+                          <CopyCode key={c} code={c} />
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell
+                    className="px-3 py-3"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {t.videoUrl ? (
+                      <a
+                        href={t.videoUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex max-w-[150px] items-center gap-1 text-sm text-primary hover:underline"
+                        title={t.videoTitle || "Watch on YouTube"}
+                      >
+                        <span className="truncate">
+                          {t.videoTitle || "Watch"}
+                        </span>
+                        <ExternalLink className="size-3.5 shrink-0" />
+                      </a>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {results.length > 0 && (
+        <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
+          <div className="flex items-center gap-3">
+            <p className="text-sm text-muted-foreground tabular-nums">
+              {start + 1}–{Math.min(start + filters.size, results.length)} of{" "}
+              {results.length.toLocaleString()}
+            </p>
+            <Select
+              value={String(filters.size)}
+              onValueChange={(v) => update({ size: Number(v) })}
+            >
+              <SelectTrigger size="sm" className="w-[110px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[25, 50, 100].map((n) => (
+                  <SelectItem key={n} value={String(n)}>
+                    {n} / page
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => update({ page: page - 1 })}
+              disabled={page <= 1}
+            >
+              <ChevronLeft className="size-4" />
+              Prev
+            </Button>
+            <span className="text-sm tabular-nums">
+              Page {page} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => update({ page: page + 1 })}
+              disabled={page >= totalPages}
+            >
+              Next
+              <ChevronRight className="size-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <TuneDetail tune={active} onOpenChange={(o) => !o && setActive(null)} />
+    </div>
+  );
+}
+
+function Toggle({
+  active,
+  onClick,
+  icon,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <Button
+      variant={active ? "default" : "outline"}
+      size="sm"
+      onClick={onClick}
+      className={cn(!active && "text-muted-foreground")}
+    >
+      {icon}
+      {children}
+    </Button>
+  );
+}
+
+function ViewButton({
+  active,
+  onClick,
+  title,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className={cn(
+        "flex size-8 items-center justify-center transition-colors cursor-pointer",
+        active
+          ? "bg-primary text-primary-foreground"
+          : "text-muted-foreground hover:bg-accent hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
+  );
+}

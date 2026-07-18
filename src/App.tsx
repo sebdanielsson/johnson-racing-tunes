@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { YoutubeIcon } from "@/components/app/brand-icons";
 import { SiteHeader } from "@/components/app/site-header";
 import { StatTiles } from "@/components/app/stat-tiles";
-import { TunesTable } from "@/components/app/tunes-table";
+import { TuneBrowser } from "@/components/app/tune-browser";
 import { CHANNEL_URL, SHEET_URL } from "@/lib/constants";
 import { games } from "@/data/tunes";
 
@@ -85,7 +85,7 @@ function App() {
           </TabsList>
 
           <TabsContent value="browse">
-            <TunesTable />
+            <TuneBrowser />
           </TabsContent>
 
           <TabsContent value="overview">

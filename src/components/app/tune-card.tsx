@@ -1,0 +1,89 @@
+import { ExternalLink } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import { CopyCode } from "@/components/app/copy-code";
+import { FavoriteButton } from "@/components/app/favorite-button";
+import { GameBadge } from "@/components/app/game-badge";
+import type { Tune } from "@/data/tunes";
+
+export function TuneCard({
+  tune,
+  onOpen,
+}: {
+  tune: Tune;
+  onOpen: (tune: Tune) => void;
+}) {
+  const tags = tune.madeFor
+    .split(/[\n/]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen(tune)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen(tune);
+        }
+      }}
+      className="flex cursor-pointer flex-col gap-3 rounded-xl border bg-card p-4 text-left transition-colors hover:border-primary/40 focus-visible:border-primary focus-visible:outline-none"
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <GameBadge game={tune.game} />
+          <Badge variant="outline" className="font-semibold">
+            {tune.class}
+          </Badge>
+          {tune.isNew && (
+            <Badge className="h-4 px-1.5 text-[10px] leading-none">NEW</Badge>
+          )}
+        </div>
+        <FavoriteButton id={tune.id} className="-mr-1 -mt-1" />
+      </div>
+
+      <div className="min-w-0">
+        <h3 className="truncate font-semibold">{tune.car}</h3>
+        <p className="truncate text-xs text-muted-foreground">
+          by {tune.creators.join(", ") || "unknown"}
+        </p>
+      </div>
+
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {tags.slice(0, 3).map((tag, i) => (
+            <span
+              key={`${tag}-${i}`}
+              className="rounded bg-secondary px-1.5 py-0.5 text-xs text-secondary-foreground"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-auto flex items-center justify-between gap-2 pt-1">
+        {tune.shareCodes[0] ? (
+          <CopyCode code={tune.shareCodes[0]} />
+        ) : (
+          <span className="text-xs text-muted-foreground">No code</span>
+        )}
+        {tune.videoUrl && (
+          <a
+            href={tune.videoUrl}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+            title={tune.videoTitle || "Watch on YouTube"}
+          >
+            Video
+            <ExternalLink className="size-3" />
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
