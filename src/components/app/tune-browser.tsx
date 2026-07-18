@@ -2,13 +2,16 @@ import * as React from "react";
 import {
   ArrowDownAZ,
   ArrowUpAZ,
+  Check,
   ChevronLeft,
   ChevronRight,
+  ClipboardCopy,
   ExternalLink,
   LayoutGrid,
   Search,
   Star,
   Table as TableIcon,
+  Trash2,
   Video,
   KeyRound,
   Sparkles,
@@ -39,10 +42,10 @@ import { GameBadge } from "@/components/app/game-badge";
 import { MultiSelect } from "@/components/app/multi-select";
 import { TuneCard } from "@/components/app/tune-card";
 import { TuneDetail } from "@/components/app/tune-detail";
-import { useFavorites } from "@/hooks/use-favorites";
+import { favoritesStore, useFavorites } from "@/hooks/use-favorites";
 import { useFilters, type SortField } from "@/hooks/use-filters";
 import { applyFilters, filterOptions } from "@/lib/filtering";
-import type { Tune } from "@/data/tunes";
+import { tunes, type Tune } from "@/data/tunes";
 import { cn } from "@/lib/utils";
 
 const SORT_LABELS: Record<SortField, string> = {
@@ -53,10 +56,21 @@ const SORT_LABELS: Record<SortField, string> = {
 };
 
 export function TuneBrowser() {
-  const { filters, update, reset } = useFilters();
+  const { filters, update, reset, setFilters } = useFilters();
   const favorites = useFavorites();
-  const [active, setActive] = React.useState<Tune | null>(null);
+  const [copied, setCopied] = React.useState(false);
   const searchRef = React.useRef<HTMLInputElement>(null);
+
+  // The opened tune is stored in the URL so a tune is directly shareable.
+  const active = React.useMemo(
+    () => tunes.find((t) => t.id === filters.tune) ?? null,
+    [filters.tune],
+  );
+  const setActive = React.useCallback(
+    (tune: Tune | null) =>
+      setFilters((prev) => ({ ...prev, tune: tune ? tune.id : null })),
+    [setFilters],
+  );
 
   // "/" focuses search, Escape blurs it.
   React.useEffect(() => {
@@ -96,6 +110,24 @@ export function TuneBrowser() {
     (filters.q ? 1 : 0);
 
   const favCount = favorites.size;
+  const codeCount = results.filter((t) => t.shareCodes.length).length;
+
+  const copyCodes = React.useCallback(async () => {
+    const lines = results
+      .filter((t) => t.shareCodes.length)
+      .map(
+        (t) =>
+          `${t.car} (${t.class} · ${t.gameCode}): ${t.shareCodes.join(", ")}`,
+      );
+    if (!lines.length) return;
+    try {
+      await navigator.clipboard.writeText(lines.join("\n"));
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      // clipboard unavailable — ignore
+    }
+  }, [results]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -243,12 +275,40 @@ export function TuneBrowser() {
           {results.length === 1 ? "tune" : "tunes"}
           {activeFilterCount > 0 ? " match your filters" : " in the database"}
         </p>
-        {activeFilterCount > 0 && (
-          <Button variant="ghost" size="sm" onClick={reset}>
-            <X className="size-4" />
-            Clear all
-          </Button>
-        )}
+        <div className="flex items-center gap-1">
+          {codeCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={copyCodes}
+              title={`Copy ${codeCount} share code${codeCount === 1 ? "" : "s"}`}
+            >
+              {copied ? (
+                <Check className="size-4 text-emerald-500" />
+              ) : (
+                <ClipboardCopy className="size-4" />
+              )}
+              {copied ? "Copied" : "Copy codes"}
+            </Button>
+          )}
+          {filters.favOnly && favCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => favoritesStore.clear()}
+              title="Remove all favorites"
+            >
+              <Trash2 className="size-4" />
+              Clear favorites
+            </Button>
+          )}
+          {activeFilterCount > 0 && (
+            <Button variant="ghost" size="sm" onClick={reset}>
+              <X className="size-4" />
+              Clear all
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Results */}

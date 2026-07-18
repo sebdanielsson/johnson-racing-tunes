@@ -19,6 +19,8 @@ export interface Filters {
   view: ViewMode;
   size: number;
   page: number;
+  /** Currently opened tune id (deep-linkable), independent of the filters. */
+  tune: string | null;
 }
 
 export const DEFAULT_FILTERS: Filters = {
@@ -36,6 +38,7 @@ export const DEFAULT_FILTERS: Filters = {
   view: "table",
   size: 25,
   page: 1,
+  tune: null,
 };
 
 function parseFromUrl(): Filters {
@@ -61,6 +64,7 @@ function parseFromUrl(): Filters {
   if ([25, 50, 100].includes(size)) f.size = size;
   const page = Number(p.get("page"));
   if (page > 1) f.page = page;
+  if (p.get("tune")) f.tune = p.get("tune");
   return f;
 }
 
@@ -81,6 +85,7 @@ function writeToUrl(f: Filters) {
   if (f.view !== DEFAULT_FILTERS.view) p.set("view", f.view);
   if (f.size !== DEFAULT_FILTERS.size) p.set("size", String(f.size));
   if (f.page > 1) p.set("page", String(f.page));
+  if (f.tune) p.set("tune", f.tune);
   const qs = p.toString();
   const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
   window.history.replaceState(null, "", url);
