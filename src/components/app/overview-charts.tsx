@@ -1,21 +1,7 @@
 import * as React from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  LabelList,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, XAxis, YAxis } from "recharts";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
@@ -23,7 +9,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { byClass, byFocus, byGame, topCreators } from "@/lib/aggregations";
-import { applyFilters } from "@/lib/filtering";
+import { activeFilterCount, applyFilters } from "@/lib/filtering";
 import { gameColorVar } from "@/lib/constants";
 import { gameShort } from "@/data/tunes";
 import { useData } from "@/data/store";
@@ -45,7 +31,7 @@ export function OverviewCharts() {
     () => applyFilters(filters, favorites, tunes),
     [filters, favorites, tunes],
   );
-  const filtered = results.length !== tunes.length;
+  const filtered = activeFilterCount(filters) > 0;
 
   const gameData = React.useMemo(
     () =>
@@ -62,11 +48,11 @@ export function OverviewCharts() {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         {filtered ? (
           <>
             Charts reflect your current filters —{" "}
-            <span className="font-medium text-foreground tabular-nums">
+            <span className="text-foreground font-medium tabular-nums">
               {results.length.toLocaleString()}
             </span>{" "}
             matching {results.length === 1 ? "tune" : "tunes"}.
@@ -77,7 +63,7 @@ export function OverviewCharts() {
       </p>
 
       {results.length === 0 ? (
-        <div className="rounded-xl border border-dashed py-20 text-center text-muted-foreground">
+        <div className="text-muted-foreground rounded-xl border border-dashed py-20 text-center">
           No tunes match your filters — adjust them to see the breakdown.
         </div>
       ) : (
@@ -281,7 +267,7 @@ function ChartCard({
         {data.length ? (
           children
         ) : (
-          <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex h-[220px] items-center justify-center text-sm">
             Not enough data for this selection.
           </div>
         )}

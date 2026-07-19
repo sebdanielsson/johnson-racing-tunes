@@ -48,13 +48,20 @@ const GAME_BY_CODE: Record<string, { name: string; order: number }> = {
 };
 
 const CLASS_ORDER_MAP: Record<string, number> = {
-  D: 0, C: 1, B: 2, A: 3, S1: 4, S2: 5, X: 6, R: 7, P: 8,
+  D: 0,
+  C: 1,
+  B: 2,
+  A: 3,
+  S1: 4,
+  S2: 5,
+  X: 6,
+  R: 7,
+  P: 8,
 };
 
 /** The dataset baked at build time — used as the instant, offline-safe seed. */
 export const initialTunes: Tune[] = packed.rows.map((row, i) => {
-  const [code, cls, carIdx, mfIdx, creatorIdx, shareCodes, info, vIdx, isNew] =
-    row;
+  const [code, cls, carIdx, mfIdx, creatorIdx, shareCodes, info, vIdx, isNew] = row;
   const game = GAME_BY_CODE[code] ?? { name: code, order: 99 };
   const video = vIdx >= 0 ? packed.videos[vIdx] : undefined;
   return {

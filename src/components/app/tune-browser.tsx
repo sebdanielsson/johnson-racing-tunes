@@ -45,9 +45,9 @@ import { TuneCard } from "@/components/app/tune-card";
 import { TuneDetail } from "@/components/app/tune-detail";
 import { favoritesStore, useFavorites } from "@/hooks/use-favorites";
 import { useFilters, type SortField } from "@/hooks/use-filters";
-import { applyFilters } from "@/lib/filtering";
+import { activeFilterCount, applyFilters } from "@/lib/filtering";
 import { useData } from "@/data/store";
-import { newSinceCount, newSinceIds } from "@/data/seen";
+import { newSinceIds } from "@/data/seen";
 import type { Tune } from "@/data/tunes";
 import { cn } from "@/lib/utils";
 
@@ -75,16 +75,15 @@ export function TuneBrowser() {
     [setTune],
   );
 
-  // "/" focuses search, Escape blurs it.
+  // "/" focuses search; Escape blurs it while it's focused.
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (
-        e.key === "/" &&
-        document.activeElement?.tagName !== "INPUT" &&
-        document.activeElement?.tagName !== "TEXTAREA"
-      ) {
+      const tag = document.activeElement?.tagName;
+      if (e.key === "/" && tag !== "INPUT" && tag !== "TEXTAREA") {
         e.preventDefault();
         searchRef.current?.focus();
+      } else if (e.key === "Escape" && document.activeElement === searchRef.current) {
+        searchRef.current?.blur();
       }
     };
     window.addEventListener("keydown", onKey);
@@ -101,16 +100,7 @@ export function TuneBrowser() {
   const start = (page - 1) * filters.size;
   const pageRows = results.slice(start, start + filters.size);
 
-  const activeFilterCount =
-    filters.games.length +
-    filters.classes.length +
-    filters.focus.length +
-    filters.creators.length +
-    (filters.favOnly ? 1 : 0) +
-    (filters.newOnly ? 1 : 0) +
-    (filters.hasVideo ? 1 : 0) +
-    (filters.hasCode ? 1 : 0) +
-    (filters.q ? 1 : 0);
+  const filterCount = activeFilterCount(filters);
 
   const favCount = favorites.size;
   const codeCount = results.filter((t) => t.shareCodes.length).length;
@@ -118,38 +108,42 @@ export function TuneBrowser() {
   const copyCodes = React.useCallback(async () => {
     const lines = results
       .filter((t) => t.shareCodes.length)
-      .map(
-        (t) =>
-          `${t.car} (${t.class} · ${t.gameCode}): ${t.shareCodes.join(", ")}`,
-      );
+      .map((t) => `${t.car} (${t.class} · ${t.gameCode}): ${t.shareCodes.join(", ")}`);
     if (!lines.length) return;
     try {
       await navigator.clipboard.writeText(lines.join("\n"));
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
     } catch {
       // clipboard unavailable — ignore
     }
   }, [results]);
+
+  // Reset the "Copied" confirmation after a beat, cancelling cleanly on unmount
+  // or a rapid second click so we never touch state after unmount.
+  React.useEffect(() => {
+    if (!copied) return;
+    const t = window.setTimeout(() => setCopied(false), 1600);
+    return () => window.clearTimeout(t);
+  }, [copied]);
 
   return (
     <div className="flex flex-col gap-4">
       {/* Row 1: search + filters */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
         <div className="relative flex-1 lg:max-w-xs">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
           <Input
             ref={searchRef}
             value={filters.q}
             onChange={(e) => update({ q: e.target.value })}
             placeholder="Search car, creator, code…"
-            className="pl-9 pr-8"
+            className="pr-8 pl-9"
           />
           {filters.q && (
             <button
               type="button"
               onClick={() => update({ q: "" })}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground absolute top-1/2 right-2 -translate-y-1/2"
               aria-label="Clear search"
             >
               <X className="size-4" />
@@ -197,18 +191,13 @@ export function TuneBrowser() {
           >
             New
           </Toggle>
-          {newSinceCount > 0 && (
+          {newSinceIds.size > 0 && (
             <Toggle
               active={filters.sinceOnly}
               onClick={() => update({ sinceOnly: !filters.sinceOnly })}
-              icon={
-                <span
-                  className="size-2 rounded-full bg-amber-400"
-                  aria-hidden="true"
-                />
-              }
+              icon={<span className="size-2 rounded-full bg-amber-400" aria-hidden="true" />}
             >
-              New to you ({newSinceCount})
+              New to you ({newSinceIds.size})
             </Toggle>
           )}
           <Toggle
@@ -232,10 +221,7 @@ export function TuneBrowser() {
               sort, so they keep a compact sort control. */}
           {filters.view === "cards" && (
             <>
-              <Select
-                value={filters.sort}
-                onValueChange={(v) => update({ sort: v as SortField })}
-              >
+              <Select value={filters.sort} onValueChange={(v) => update({ sort: v as SortField })}>
                 <SelectTrigger size="sm" className="w-[130px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -252,9 +238,7 @@ export function TuneBrowser() {
                 size="icon"
                 className="size-8"
                 title={filters.dir === "asc" ? "Ascending" : "Descending"}
-                onClick={() =>
-                  update({ dir: filters.dir === "asc" ? "desc" : "asc" })
-                }
+                onClick={() => update({ dir: filters.dir === "asc" ? "desc" : "asc" })}
               >
                 {filters.dir === "asc" ? (
                   <ArrowUp className="size-4" />
@@ -285,12 +269,12 @@ export function TuneBrowser() {
 
       {/* Result count + reset */}
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm text-muted-foreground">
-          <span className="font-medium text-foreground tabular-nums">
+        <p className="text-muted-foreground text-sm">
+          <span className="text-foreground font-medium tabular-nums">
             {results.length.toLocaleString()}
           </span>{" "}
           {results.length === 1 ? "tune" : "tunes"}
-          {activeFilterCount > 0 ? " match your filters" : " in the database"}
+          {filterCount > 0 ? " match your filters" : " in the database"}
         </p>
         <div className="flex items-center gap-1">
           {codeCount > 0 && (
@@ -319,7 +303,7 @@ export function TuneBrowser() {
               Clear favorites
             </Button>
           )}
-          {activeFilterCount > 0 && (
+          {filterCount > 0 && (
             <Button variant="ghost" size="sm" onClick={reset}>
               <X className="size-4" />
               Clear all
@@ -331,9 +315,9 @@ export function TuneBrowser() {
       {/* Results */}
       {results.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed py-20 text-center">
-          <Search className="size-8 text-muted-foreground" />
+          <Search className="text-muted-foreground size-8" />
           <p className="font-medium">No tunes match your filters</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Try removing a filter or searching a different car.
           </p>
           <Button variant="outline" size="sm" className="mt-2" onClick={reset}>
@@ -347,7 +331,7 @@ export function TuneBrowser() {
           ))}
         </div>
       ) : (
-        <div className="rounded-xl border bg-card">
+        <div className="bg-card rounded-xl border">
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
@@ -377,7 +361,7 @@ export function TuneBrowser() {
                     </Badge>
                   </TableCell>
                   <TableCell className="px-3 py-3 align-top">
-                    <div className="min-w-[170px] max-w-[280px]">
+                    <div className="max-w-[280px] min-w-[170px]">
                       <div className="flex items-center gap-2">
                         {newSinceIds.has(t.id) && (
                           <span
@@ -386,50 +370,47 @@ export function TuneBrowser() {
                             aria-label="New since your last visit"
                           />
                         )}
-                        <span className="font-semibold text-foreground group-hover:text-primary">
+                        <span className="text-foreground group-hover:text-primary font-semibold">
                           {t.car}
                         </span>
                         {t.isNew && (
-                          <Badge className="h-4 px-1.5 text-[10px] leading-none">
-                            NEW
-                          </Badge>
+                          <Badge className="h-4 px-1.5 text-[10px] leading-none">NEW</Badge>
                         )}
                       </div>
-                      {t.info && (
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                          {t.info}
-                        </p>
-                      )}
+                      {t.info && <p className="text-muted-foreground mt-0.5 text-xs">{t.info}</p>}
                     </div>
                   </TableCell>
                   <TableCell className="px-3 py-3">
                     <GameBadge game={t.game} />
                   </TableCell>
                   <TableCell className="px-3 py-3">
-                    <div className="flex max-w-[200px] flex-wrap gap-1">
-                      {t.madeFor
+                    {(() => {
+                      const tags = t.madeFor
                         .split(/[\n/]/)
                         .map((s) => s.trim())
-                        .filter(Boolean)
-                        .map((tag, i) => (
-                          <span
-                            key={`${tag}-${i}`}
-                            className="rounded bg-secondary px-1.5 py-0.5 text-xs text-secondary-foreground"
-                          >
-                            {tag}
-                          </span>
-                        )) || <span className="text-muted-foreground">—</span>}
-                    </div>
+                        .filter(Boolean);
+                      return tags.length ? (
+                        <div className="flex max-w-[200px] flex-wrap gap-1">
+                          {tags.map((tag, i) => (
+                            <span
+                              key={`${tag}-${i}`}
+                              className="bg-secondary text-secondary-foreground rounded px-1.5 py-0.5 text-xs"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      );
+                    })()}
                   </TableCell>
                   <TableCell className="px-3 py-3">
-                    <div className="max-w-[150px] text-sm text-muted-foreground">
+                    <div className="text-muted-foreground max-w-[150px] text-sm">
                       {t.creators.join(", ") || "—"}
                     </div>
                   </TableCell>
-                  <TableCell
-                    className="px-3 py-3"
-                    onClick={(e) => e.stopPropagation()}
-                  >
+                  <TableCell className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
                     {t.shareCodes.length ? (
                       <div className="flex flex-col items-start gap-1">
                         {t.shareCodes.map((c) => (
@@ -440,21 +421,16 @@ export function TuneBrowser() {
                       <span className="text-muted-foreground">—</span>
                     )}
                   </TableCell>
-                  <TableCell
-                    className="px-3 py-3"
-                    onClick={(e) => e.stopPropagation()}
-                  >
+                  <TableCell className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
                     {t.videoUrl ? (
                       <a
                         href={t.videoUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex max-w-[150px] items-center gap-1 text-sm text-primary hover:underline"
+                        className="text-primary inline-flex max-w-[150px] items-center gap-1 text-sm hover:underline"
                         title={t.videoTitle || "Watch on YouTube"}
                       >
-                        <span className="truncate">
-                          {t.videoTitle || "Watch"}
-                        </span>
+                        <span className="truncate">{t.videoTitle || "Watch"}</span>
                         <ExternalLink className="size-3.5 shrink-0" />
                       </a>
                     ) : (
@@ -472,14 +448,11 @@ export function TuneBrowser() {
       {results.length > 0 && (
         <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
           <div className="flex items-center gap-3">
-            <p className="text-sm text-muted-foreground tabular-nums">
+            <p className="text-muted-foreground text-sm tabular-nums">
               {start + 1}–{Math.min(start + filters.size, results.length)} of{" "}
               {results.length.toLocaleString()}
             </p>
-            <Select
-              value={String(filters.size)}
-              onValueChange={(v) => update({ size: Number(v) })}
-            >
+            <Select value={String(filters.size)} onValueChange={(v) => update({ size: Number(v) })}>
               <SelectTrigger size="sm" className="w-[110px]">
                 <SelectValue />
               </SelectTrigger>
@@ -523,17 +496,14 @@ export function TuneBrowser() {
   );
 }
 
-function SortableHead({
-  field,
-  label,
-}: {
-  field: SortField;
-  label: string;
-}) {
+function SortableHead({ field, label }: { field: SortField; label: string }) {
   const { filters, update } = useFilters();
   const active = filters.sort === field;
   return (
-    <TableHead className="px-3">
+    <TableHead
+      className="px-3"
+      aria-sort={active ? (filters.dir === "asc" ? "ascending" : "descending") : "none"}
+    >
       <button
         type="button"
         onClick={() =>
@@ -542,16 +512,9 @@ function SortableHead({
             dir: active && filters.dir === "asc" ? "desc" : "asc",
           })
         }
-        aria-sort={
-          active
-            ? filters.dir === "asc"
-              ? "ascending"
-              : "descending"
-            : "none"
-        }
         title={`Sort by ${label.toLowerCase()}`}
         className={cn(
-          "-mx-1 inline-flex items-center gap-1 rounded px-1 py-1 font-medium transition-colors cursor-pointer hover:text-foreground",
+          "group -mx-1 inline-flex items-center gap-1 rounded px-1 py-1 font-medium transition-colors cursor-pointer hover:text-foreground",
           active ? "text-foreground" : "text-muted-foreground",
         )}
       >

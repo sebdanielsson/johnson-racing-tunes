@@ -37,7 +37,7 @@ export function RefreshButton() {
   return (
     <div className="flex items-center gap-1.5">
       {lastUpdated && !loading && status !== "error" && (
-        <span className="hidden text-xs text-muted-foreground xl:inline">
+        <span className="text-muted-foreground hidden text-xs xl:inline">
           Updated {relativeTime(lastUpdated)}
         </span>
       )}
@@ -50,7 +50,7 @@ export function RefreshButton() {
         title={title}
       >
         {status === "error" ? (
-          <TriangleAlert className="size-4 text-destructive" />
+          <TriangleAlert className="text-destructive size-4" />
         ) : (
           <RefreshCw className={cn("size-4", loading && "animate-spin")} />
         )}

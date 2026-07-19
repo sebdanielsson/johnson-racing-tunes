@@ -7,7 +7,6 @@ export const gameColorVar: Record<string, string> = {
   "Forza Motorsport 7": "var(--chart-5)",
 };
 
-export const CHANNEL_URL =
-  "https://www.youtube.com/channel/UCGK33hhvffYv5hUNqB0wVnQ";
+export const CHANNEL_URL = "https://www.youtube.com/channel/UCGK33hhvffYv5hUNqB0wVnQ";
 export const SHEET_URL =
   "https://docs.google.com/spreadsheets/d/1F3xqy6yodUmnuua08YU-fet4KDDoIbaoNZRiZ9U8yxk/htmlview";

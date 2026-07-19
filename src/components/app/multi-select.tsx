@@ -2,11 +2,7 @@ import * as React from "react";
 import { Check, ChevronDown, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 interface Option {
@@ -43,11 +39,7 @@ export function MultiSelect({
   }, [options, query]);
 
   const toggle = (value: string) => {
-    onChange(
-      selected.includes(value)
-        ? selected.filter((v) => v !== value)
-        : [...selected, value],
-    );
+    onChange(selected.includes(value) ? selected.filter((v) => v !== value) : [...selected, value]);
   };
 
   return (
@@ -64,7 +56,7 @@ export function MultiSelect({
         >
           <span className="truncate">{label}</span>
           {selected.length > 0 && (
-            <span className="flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground tabular-nums">
+            <span className="bg-primary text-primary-foreground flex size-4 items-center justify-center rounded-full text-[10px] font-semibold tabular-nums">
               {selected.length}
             </span>
           )}
@@ -74,21 +66,19 @@ export function MultiSelect({
       <PopoverContent className="w-64 p-0" align={align}>
         {searchable && (
           <div className="relative border-b p-2">
-            <Search className="absolute left-4 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-1/2 left-4 size-3.5 -translate-y-1/2" />
             <input
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={`Search ${label.toLowerCase()}…`}
-              className="h-8 w-full rounded-md bg-transparent pl-7 pr-2 text-sm outline-none placeholder:text-muted-foreground"
+              className="placeholder:text-muted-foreground h-8 w-full rounded-md bg-transparent pr-2 pl-7 text-sm outline-none"
             />
           </div>
         )}
         <div className="max-h-72 overflow-y-auto p-1">
           {filtered.length === 0 && (
-            <p className="px-2 py-6 text-center text-sm text-muted-foreground">
-              No matches
-            </p>
+            <p className="text-muted-foreground px-2 py-6 text-center text-sm">No matches</p>
           )}
           {filtered.map((o) => {
             const active = selected.includes(o.value);
@@ -97,23 +87,19 @@ export function MultiSelect({
                 key={o.value}
                 type="button"
                 onClick={() => toggle(o.value)}
-                className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent"
+                className="hover:bg-accent flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm"
               >
                 <span
                   className={cn(
                     "flex size-4 shrink-0 items-center justify-center rounded border",
-                    active
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-input",
+                    active ? "border-primary bg-primary text-primary-foreground" : "border-input",
                   )}
                 >
                   {active && <Check className="size-3" />}
                 </span>
                 <span className="flex-1 truncate">{o.label ?? o.value}</span>
                 {o.count !== undefined && (
-                  <span className="text-xs text-muted-foreground tabular-nums">
-                    {o.count}
-                  </span>
+                  <span className="text-muted-foreground text-xs tabular-nums">{o.count}</span>
                 )}
               </button>
             );
@@ -124,7 +110,7 @@ export function MultiSelect({
             <button
               type="button"
               onClick={() => onChange([])}
-              className="w-full rounded-sm px-2 py-1.5 text-left text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+              className="text-muted-foreground hover:bg-accent hover:text-foreground w-full rounded-sm px-2 py-1.5 text-left text-xs"
             >
               Clear {selected.length} selected
             </button>

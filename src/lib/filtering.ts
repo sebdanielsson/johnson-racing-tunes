@@ -30,35 +30,40 @@ const comparators: Record<SortField, (a: Tune, b: Tune) => number> = {
   class: (a, b) => a.classOrder - b.classOrder || a.car.localeCompare(b.car),
   car: (a, b) => a.car.localeCompare(b.car) || a.classOrder - b.classOrder,
   game: (a, b) =>
-    a.gameOrder - b.gameOrder ||
-    a.classOrder - b.classOrder ||
-    a.car.localeCompare(b.car),
+    a.gameOrder - b.gameOrder || a.classOrder - b.classOrder || a.car.localeCompare(b.car),
   creator: (a, b) =>
     (a.creators[0] ?? "").localeCompare(b.creators[0] ?? "") ||
     a.classOrder - b.classOrder ||
     a.car.localeCompare(b.car),
 };
 
-export function applyFilters(
-  filters: Filters,
-  favorites: Set<string>,
-  rows: Tune[],
-): Tune[] {
+/** How many filters are actively narrowing the result set. */
+export function activeFilterCount(filters: Filters): number {
+  return (
+    filters.games.length +
+    filters.classes.length +
+    filters.focus.length +
+    filters.creators.length +
+    (filters.favOnly ? 1 : 0) +
+    (filters.newOnly ? 1 : 0) +
+    (filters.sinceOnly ? 1 : 0) +
+    (filters.hasVideo ? 1 : 0) +
+    (filters.hasCode ? 1 : 0) +
+    (filters.q.trim() ? 1 : 0)
+  );
+}
+
+export function applyFilters(filters: Filters, favorites: Set<string>, rows: Tune[]): Tune[] {
   const q = filters.q.trim().toLowerCase();
   let out = rows.filter((t) => {
     if (q && !matchesQuery(t, q)) return false;
     if (filters.games.length && !filters.games.includes(t.game)) return false;
-    if (filters.classes.length && !filters.classes.includes(t.class))
-      return false;
-    if (
-      filters.creators.length &&
-      !t.creators.some((c) => filters.creators.includes(c))
-    )
+    if (filters.classes.length && !filters.classes.includes(t.class)) return false;
+    if (filters.creators.length && !t.creators.some((c) => filters.creators.includes(c)))
       return false;
     if (filters.focus.length) {
       const hay = t.madeFor.toLowerCase();
-      if (!filters.focus.some((f) => hay.includes(f.toLowerCase())))
-        return false;
+      if (!filters.focus.some((f) => hay.includes(f.toLowerCase()))) return false;
     }
     if (filters.favOnly && !favorites.has(t.id)) return false;
     if (filters.newOnly && !t.isNew) return false;

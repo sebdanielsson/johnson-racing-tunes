@@ -25,19 +25,17 @@ export function StatTiles() {
       {tiles.map((t) => (
         <Card
           key={t.label}
-          className="gap-0 overflow-hidden py-0 transition-colors hover:border-primary/40"
+          className="hover:border-primary/40 gap-0 overflow-hidden py-0 transition-colors"
         >
           <div className="flex items-center gap-3 p-4">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <div className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg">
               <t.icon className="size-5" />
             </div>
             <div className="min-w-0">
-              <div className="text-2xl font-bold tabular-nums leading-none">
+              <div className="text-2xl leading-none font-bold tabular-nums">
                 {t.value.toLocaleString()}
               </div>
-              <div className="mt-1 truncate text-xs text-muted-foreground">
-                {t.label}
-              </div>
+              <div className="text-muted-foreground mt-1 truncate text-xs">{t.label}</div>
             </div>
           </div>
         </Card>
