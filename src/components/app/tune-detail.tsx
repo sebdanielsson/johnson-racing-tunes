@@ -3,7 +3,6 @@ import { ExternalLink, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { CopyCode } from "@/components/app/copy-code";
-import { FavoriteButton } from "@/components/app/favorite-button";
 import { GameBadge } from "@/components/app/game-badge";
 import { YoutubeIcon } from "@/components/app/brand-icons";
 import type { Tune } from "@/data/tunes";
@@ -27,7 +26,6 @@ export function TuneDetail({
                   {tune.class}
                 </Badge>
                 {tune.isNew && <Badge className="text-[10px]">NEW</Badge>}
-                <FavoriteButton id={tune.id} className="ml-auto" />
               </div>
               <DialogTitle className="mt-1 text-xl">{tune.car}</DialogTitle>
             </DialogHeader>
