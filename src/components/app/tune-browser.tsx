@@ -42,7 +42,12 @@ import { FavoriteButton } from "@/components/app/favorite-button";
 import { GameBadge } from "@/components/app/game-badge";
 import { MultiSelect } from "@/components/app/multi-select";
 import { TuneCard } from "@/components/app/tune-card";
-import { TuneDetail } from "@/components/app/tune-detail";
+
+// The detail dialog (and radix-dialog) is only needed once a tune is opened, so
+// keep it out of the initial bundle.
+const TuneDetail = React.lazy(() =>
+  import("@/components/app/tune-detail").then((m) => ({ default: m.TuneDetail })),
+);
 import { favoritesStore, useFavorites } from "@/hooks/use-favorites";
 import { useFilters, type SortField } from "@/hooks/use-filters";
 import { activeFilterCount, applyFilters } from "@/lib/filtering";
@@ -74,6 +79,13 @@ export function TuneBrowser() {
     (tune: Tune | null) => setTune(tune ? tune.id : null),
     [setTune],
   );
+
+  // Mount the lazy detail dialog on first open, then keep it mounted so its
+  // open/close transitions still run.
+  const [detailMounted, setDetailMounted] = React.useState(false);
+  React.useEffect(() => {
+    if (active) setDetailMounted(true);
+  }, [active]);
 
   // "/" focuses search; Escape blurs it while it's focused.
   React.useEffect(() => {
@@ -222,7 +234,7 @@ export function TuneBrowser() {
           {filters.view === "cards" && (
             <>
               <Select value={filters.sort} onValueChange={(v) => update({ sort: v as SortField })}>
-                <SelectTrigger size="sm" className="w-[130px]">
+                <SelectTrigger size="sm" className="w-[130px]" aria-label="Sort tunes by">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -335,7 +347,9 @@ export function TuneBrowser() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-8 px-3"></TableHead>
+                <TableHead className="w-8 px-3">
+                  <span className="sr-only">Favorite</span>
+                </TableHead>
                 <SortableHead field="class" label="Class" />
                 <SortableHead field="car" label="Car" />
                 <SortableHead field="game" label="Game" />
@@ -453,7 +467,7 @@ export function TuneBrowser() {
               {results.length.toLocaleString()}
             </p>
             <Select value={String(filters.size)} onValueChange={(v) => update({ size: Number(v) })}>
-              <SelectTrigger size="sm" className="w-[110px]">
+              <SelectTrigger size="sm" className="w-[110px]" aria-label="Tunes per page">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -491,7 +505,11 @@ export function TuneBrowser() {
         </div>
       )}
 
-      <TuneDetail tune={active} onOpenChange={(o) => !o && setActive(null)} />
+      {detailMounted && (
+        <React.Suspense fallback={null}>
+          <TuneDetail tune={active} onOpenChange={(o) => !o && setActive(null)} />
+        </React.Suspense>
+      )}
     </div>
   );
 }

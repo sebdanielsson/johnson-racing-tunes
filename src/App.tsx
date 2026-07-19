@@ -37,7 +37,7 @@ function App() {
         {/* Hero */}
         <section className="py-10 sm:py-14">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="border-primary/30 bg-primary/10 text-primary inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium">
+            <span className="border-primary/30 bg-primary/10 text-primary inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium dark:text-[color-mix(in_oklab,var(--primary)_68%,#fff)]">
               <span className="relative flex size-1.5">
                 <span className="bg-primary absolute inline-flex size-full animate-ping rounded-full opacity-75" />
                 <span className="bg-primary relative inline-flex size-1.5 rounded-full" />
