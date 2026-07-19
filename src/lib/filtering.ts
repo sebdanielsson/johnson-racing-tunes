@@ -45,7 +45,6 @@ export function activeFilterCount(filters: Filters): number {
     filters.focus.length +
     filters.creators.length +
     (filters.favOnly ? 1 : 0) +
-    (filters.newOnly ? 1 : 0) +
     (filters.sinceOnly ? 1 : 0) +
     (filters.hasVideo ? 1 : 0) +
     (filters.q.trim() ? 1 : 0)
@@ -65,7 +64,6 @@ export function applyFilters(filters: Filters, favorites: Set<string>, rows: Tun
       if (!filters.focus.some((f) => hay.includes(f.toLowerCase()))) return false;
     }
     if (filters.favOnly && !favorites.has(t.id)) return false;
-    if (filters.newOnly && !t.isNew) return false;
     if (filters.sinceOnly && !newSinceIds.has(t.id)) return false;
     if (filters.hasVideo && !t.videoUrl) return false;
     return true;
