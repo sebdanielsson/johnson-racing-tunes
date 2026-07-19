@@ -1,11 +1,26 @@
+import { execSync } from "node:child_process";
 import path from "node:path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
+// Commit SHA for the footer: Vercel exposes it at build time; fall back to the
+// local git HEAD for dev/local builds.
+function commitSha(): string {
+  if (process.env.VERCEL_GIT_COMMIT_SHA) return process.env.VERCEL_GIT_COMMIT_SHA;
+  try {
+    return execSync("git rev-parse HEAD").toString().trim();
+  } catch {
+    return "";
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __COMMIT_SHA__: JSON.stringify(commitSha()),
+  },
   plugins: [
     react(),
     tailwindcss(),

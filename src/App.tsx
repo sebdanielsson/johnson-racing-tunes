@@ -8,7 +8,7 @@ import { SiteHeader } from "@/components/app/site-header";
 import { StatTiles } from "@/components/app/stat-tiles";
 import { GameSwitcher } from "@/components/app/game-switcher";
 import { TuneBrowser } from "@/components/app/tune-browser";
-import { CHANNEL_URL, SHEET_URL } from "@/lib/constants";
+import { CHANNEL_URL, COMMIT_SHORT, COMMIT_URL, REPO_URL, SHEET_URL } from "@/lib/constants";
 import { useData } from "@/data/store";
 import { useAutoRefresh } from "@/hooks/use-auto-refresh";
 
@@ -125,7 +125,26 @@ function App() {
             </a>
             . Data © the respective tune creators.
           </p>
-          <p>Built with Vite · shadcn/ui · Recharts</p>
+          {COMMIT_SHORT ? (
+            <a
+              href={COMMIT_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-foreground font-mono text-xs"
+              title="View this build's commit on GitHub"
+            >
+              {COMMIT_SHORT}
+            </a>
+          ) : (
+            <a
+              href={REPO_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-foreground text-xs"
+            >
+              Source
+            </a>
+          )}
         </div>
       </footer>
     </div>
