@@ -63,6 +63,17 @@ const SORT_LABELS: Record<SortField, string> = {
   creator: "Creator",
 };
 
+// Base UI's Select.Value looks up the trigger label from the root `items` map,
+// so mirror the option labels here.
+const SORT_ITEMS: Record<string, string> = Object.fromEntries(
+  (Object.keys(SORT_LABELS) as SortField[]).map((k) => [k, `Sort: ${SORT_LABELS[k]}`]),
+);
+const PAGE_SIZE_ITEMS: Record<string, string> = {
+  "25": "25 / page",
+  "50": "50 / page",
+  "100": "100 / page",
+};
+
 export function TuneBrowser() {
   const { filters, update, reset, setTune } = useFilters();
   const { tunes, filterOptions } = useData();
@@ -233,7 +244,11 @@ export function TuneBrowser() {
               sort, so they keep a compact sort control. */}
           {filters.view === "cards" && (
             <>
-              <Select value={filters.sort} onValueChange={(v) => update({ sort: v as SortField })}>
+              <Select
+                items={SORT_ITEMS}
+                value={filters.sort}
+                onValueChange={(v) => update({ sort: v as SortField })}
+              >
                 <SelectTrigger size="sm" className="w-[130px]" aria-label="Sort tunes by">
                   <SelectValue />
                 </SelectTrigger>
@@ -347,16 +362,22 @@ export function TuneBrowser() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-8 px-3">
+                <TableHead scope="col" className="w-8 px-3">
                   <span className="sr-only">Favorite</span>
                 </TableHead>
                 <SortableHead field="class" label="Class" />
                 <SortableHead field="car" label="Car" />
                 <SortableHead field="game" label="Game" />
-                <TableHead className="px-3">Made for</TableHead>
+                <TableHead scope="col" className="px-3">
+                  Made for
+                </TableHead>
                 <SortableHead field="creator" label="Creator" />
-                <TableHead className="px-3">Share code</TableHead>
-                <TableHead className="px-3">Video</TableHead>
+                <TableHead scope="col" className="px-3">
+                  Share code
+                </TableHead>
+                <TableHead scope="col" className="px-3">
+                  Video
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -441,7 +462,7 @@ export function TuneBrowser() {
                         href={t.videoUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-primary inline-flex max-w-[150px] items-center gap-1 text-sm hover:underline"
+                        className="text-primary-accent inline-flex max-w-[150px] items-center gap-1 text-sm hover:underline"
                         title={t.videoTitle || "Watch on YouTube"}
                       >
                         <span className="truncate">{t.videoTitle || "Watch"}</span>
@@ -466,7 +487,11 @@ export function TuneBrowser() {
               {start + 1}–{Math.min(start + filters.size, results.length)} of{" "}
               {results.length.toLocaleString()}
             </p>
-            <Select value={String(filters.size)} onValueChange={(v) => update({ size: Number(v) })}>
+            <Select
+              items={PAGE_SIZE_ITEMS}
+              value={String(filters.size)}
+              onValueChange={(v) => update({ size: Number(v) })}
+            >
               <SelectTrigger size="sm" className="w-[110px]" aria-label="Tunes per page">
                 <SelectValue />
               </SelectTrigger>
@@ -519,6 +544,7 @@ function SortableHead({ field, label }: { field: SortField; label: string }) {
   const active = filters.sort === field;
   return (
     <TableHead
+      scope="col"
       className="px-3"
       aria-sort={active ? (filters.dir === "asc" ? "ascending" : "descending") : "none"}
     >

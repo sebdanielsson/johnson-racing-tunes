@@ -44,24 +44,26 @@ export function MultiSelect({
 
   return (
     <Popover onOpenChange={(o) => !o && setQuery("")}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn(
-            "justify-between gap-1.5",
-            selected.length > 0 && "border-primary/50",
-            className,
-          )}
-        >
-          <span className="truncate">{label}</span>
-          {selected.length > 0 && (
-            <span className="bg-primary text-primary-foreground flex size-4 items-center justify-center rounded-full text-[10px] font-semibold tabular-nums">
-              {selected.length}
-            </span>
-          )}
-          <ChevronDown className="size-3.5 opacity-60" />
-        </Button>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn(
+              "justify-between gap-1.5",
+              selected.length > 0 && "border-primary/50",
+              className,
+            )}
+          />
+        }
+      >
+        <span className="truncate">{label}</span>
+        {selected.length > 0 && (
+          <span className="bg-primary text-primary-foreground flex size-4 items-center justify-center rounded-full text-[10px] font-semibold tabular-nums">
+            {selected.length}
+          </span>
+        )}
+        <ChevronDown className="size-3.5 opacity-60" />
       </PopoverTrigger>
       <PopoverContent className="w-64 p-0" align={align}>
         {searchable && (
