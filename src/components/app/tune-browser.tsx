@@ -59,11 +59,6 @@ const SORT_LABELS: Record<SortField, string> = {
   creator: "Creator",
 };
 
-// Base UI's Select.Value looks up the trigger label from the root `items` map,
-// so mirror the option labels here.
-const SORT_ITEMS: Record<string, string> = Object.fromEntries(
-  (Object.keys(SORT_LABELS) as SortField[]).map((k) => [k, `Sort: ${SORT_LABELS[k]}`]),
-);
 const PAGE_SIZE_ITEMS: Record<string, string> = {
   "25": "25",
   "50": "50",
@@ -213,18 +208,18 @@ export function TuneBrowser() {
         </div>
       </div>
 
-      {/* Result count + actions + view controls, all on one row to save space */}
-      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
-        <p className="text-muted-foreground text-sm">
+      {/* Result count + actions + view controls, all on one row to save space.
+          The count is hidden on mobile (the pagination row shows the total) so
+          the controls fit on a single line. */}
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+        <p className="text-muted-foreground hidden text-sm sm:block">
           <span className="text-foreground font-medium tabular-nums">
             {results.length.toLocaleString()}
           </span>{" "}
           {results.length === 1 ? "tune" : "tunes"}
-          <span className="hidden sm:inline">
-            {filterCount > 0 ? " match your filters" : " in the database"}
-          </span>
+          {filterCount > 0 ? " match your filters" : " in the database"}
         </p>
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="ml-auto flex flex-wrap items-center gap-1.5">
           {codeCount > 0 && (
             <Button
               variant="ghost"
@@ -257,17 +252,18 @@ export function TuneBrowser() {
           {filters.view === "cards" && (
             <>
               <Select
-                items={SORT_ITEMS}
+                items={SORT_LABELS}
                 value={filters.sort}
                 onValueChange={(v) => update({ sort: v as SortField })}
               >
-                <SelectTrigger size="sm" className="w-[130px]" aria-label="Sort tunes by">
+                <SelectTrigger size="sm" className="w-auto" aria-label="Sort tunes by">
+                  <ChevronsUpDown className="size-3.5 shrink-0 opacity-60" />
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {(Object.keys(SORT_LABELS) as SortField[]).map((k) => (
                     <SelectItem key={k} value={k}>
-                      Sort: {SORT_LABELS[k]}
+                      {SORT_LABELS[k]}
                     </SelectItem>
                   ))}
                 </SelectContent>

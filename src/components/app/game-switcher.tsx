@@ -1,10 +1,19 @@
 import { Layers } from "lucide-react";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useData } from "@/data/store";
 import { useFilters } from "@/hooks/use-filters";
 import { gameColorVar } from "@/lib/constants";
 import { gameShort } from "@/data/tunes";
 import { cn } from "@/lib/utils";
+
+const ALL = "__all__";
 
 export function GameSwitcher() {
   const { filterOptions, stats } = useData();
@@ -14,27 +23,65 @@ export function GameSwitcher() {
   // (?game=FH5&game=FH4) is a real filter, so no pill is highlighted then.
   const noGameFilter = filters.games.length === 0;
 
-  // Rendered as a fragment so the pills sit in the same wrapping row as the
-  // Browse/Overview tabs (see App.tsx).
+  // Trigger labels for the mobile dropdown (short codes keep it compact).
+  const items: Record<string, string> = {
+    [ALL]: "All games",
+    ...Object.fromEntries(filterOptions.games.map((g) => [g.value, gameShort[g.value] ?? g.value])),
+  };
+  const value = active ?? ALL;
+  const onChange = (v: string | null) => update({ games: v && v !== ALL ? [v] : [] });
+
   return (
     <>
-      <Pill
-        active={noGameFilter}
-        onClick={() => update({ games: [] })}
-        label="All games"
-        count={stats.total}
-      />
-      {filterOptions.games.map((g) => (
+      {/* Mobile: a compact dropdown pill (scopes both Browse and Overview). */}
+      <Select value={value} onValueChange={onChange} items={items}>
+        <SelectTrigger size="sm" className="w-auto gap-1.5 sm:hidden" aria-label="Filter by game">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent align="start">
+          <SelectItem value={ALL}>
+            <Layers className="size-3.5 shrink-0 opacity-70" />
+            <span>All games</span>
+            <span className="text-muted-foreground ml-4 text-xs tabular-nums">
+              {stats.total.toLocaleString()}
+            </span>
+          </SelectItem>
+          {filterOptions.games.map((g) => (
+            <SelectItem key={g.value} value={g.value}>
+              <span
+                className="size-2.5 shrink-0 rounded-[3px]"
+                style={{ backgroundColor: gameColorVar[g.value] }}
+                aria-hidden="true"
+              />
+              <span>{g.value}</span>
+              <span className="text-muted-foreground ml-4 text-xs tabular-nums">
+                {g.count.toLocaleString()}
+              </span>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Desktop: the segmented pill row. */}
+      <div className="hidden flex-wrap items-center gap-2 sm:flex">
         <Pill
-          key={g.value}
-          active={active === g.value}
-          onClick={() => update({ games: active === g.value ? [] : [g.value] })}
-          label={gameShort[g.value] ?? g.value}
-          fullLabel={g.value}
-          count={g.count}
-          color={gameColorVar[g.value]}
+          active={noGameFilter}
+          onClick={() => update({ games: [] })}
+          label="All games"
+          count={stats.total}
         />
-      ))}
+        {filterOptions.games.map((g) => (
+          <Pill
+            key={g.value}
+            active={active === g.value}
+            onClick={() => update({ games: active === g.value ? [] : [g.value] })}
+            label={gameShort[g.value] ?? g.value}
+            fullLabel={g.value}
+            count={g.count}
+            color={gameColorVar[g.value]}
+          />
+        ))}
+      </div>
     </>
   );
 }
@@ -91,9 +138,7 @@ function Pill({
       <span>{label}</span>
       <span
         className={cn(
-          // Counts are hidden on mobile to save space (the active count also
-          // shows in the results line); they return on sm+.
-          "hidden rounded-full px-1.5 text-xs tabular-nums sm:inline",
+          "rounded-full px-1.5 text-xs tabular-nums",
           active ? "bg-background/60 text-foreground" : "bg-muted text-muted-foreground",
         )}
       >
