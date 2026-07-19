@@ -1,5 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+/* Base UI (base-nova) components rely on custom variants defined here —
+   data-open/closed/active/horizontal/… — added by `shadcn init`. */
+@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 

@@ -10,6 +10,7 @@ import { GameSwitcher } from "@/components/app/game-switcher";
 import { TuneBrowser } from "@/components/app/tune-browser";
 import { CHANNEL_URL, SHEET_URL } from "@/lib/constants";
 import { useData } from "@/data/store";
+import { useAutoRefresh } from "@/hooks/use-auto-refresh";
 
 // Recharts is heavy — only load the charts when the Overview tab is opened.
 const OverviewCharts = lazy(() =>
@@ -20,6 +21,7 @@ const OverviewCharts = lazy(() =>
 
 function App() {
   const { games } = useData();
+  useAutoRefresh();
   return (
     <div className="bg-background min-h-screen">
       <div className="bg-grid pointer-events-none fixed inset-0 -z-10 opacity-60" />
@@ -89,11 +91,13 @@ function App() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="browse">
+          {/* min-w-0: the panel is a flex child (Base UI Tabs), so without this
+              the wide table expands the page instead of scrolling in-place. */}
+          <TabsContent value="browse" className="min-w-0">
             <TuneBrowser />
           </TabsContent>
 
-          <TabsContent value="overview">
+          <TabsContent value="overview" className="min-w-0">
             <Suspense
               fallback={
                 <div className="text-muted-foreground flex h-[400px] items-center justify-center">
