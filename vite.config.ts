@@ -55,6 +55,8 @@ export default defineConfig({
         // The tune dataset is baked into the JS bundle, so all data is available
         // offline too.
         globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
+        // The OG image is only fetched by link-preview crawlers, never the app.
+        globIgnores: ["**/og-image.png"],
         navigateFallback: "/index.html",
         // The Google Sheets CSV proxy must always hit the network, never the
         // SPA shell.
