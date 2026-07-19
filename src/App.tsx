@@ -73,23 +73,22 @@ function App() {
           </div>
         </section>
 
-        {/* Game selector — scopes both Browse and Overview */}
-        <div className="mb-6">
-          <GameSwitcher />
-        </div>
-
-        {/* Content */}
+        {/* Content — view tabs + game selector share one wrapping row.
+            The game selector scopes both Browse and Overview. */}
         <Tabs defaultValue="browse" className="gap-6">
-          <TabsList>
-            <TabsTrigger value="browse">
-              <TableIcon className="size-4" />
-              Browse
-            </TabsTrigger>
-            <TabsTrigger value="overview">
-              <BarChart3 className="size-4" />
-              Overview
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex flex-wrap items-center gap-2">
+            <TabsList>
+              <TabsTrigger value="browse">
+                <TableIcon className="size-4" />
+                Browse
+              </TabsTrigger>
+              <TabsTrigger value="overview">
+                <BarChart3 className="size-4" />
+                Overview
+              </TabsTrigger>
+            </TabsList>
+            <GameSwitcher />
+          </div>
 
           {/* min-w-0: the panel is a flex child (Base UI Tabs), so without this
               the wide table expands the page instead of scrolling in-place. */}
