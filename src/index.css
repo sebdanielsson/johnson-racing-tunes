@@ -80,7 +80,9 @@
   --card-foreground: #fafafa;
   --popover: #141417;
   --popover-foreground: #fafafa;
-  --primary: #ef2b39;
+  /* White-on-primary needs a darker red to clear WCAG AA (4.5:1); red used as
+     TEXT on dark surfaces is lightened per-usage via .text-primary-accent. */
+  --primary: #d81f2a;
   --primary-foreground: #ffffff;
   --secondary: #1b1b1f;
   --secondary-foreground: #fafafa;
@@ -92,7 +94,7 @@
   --destructive-foreground: #ffffff;
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.14);
-  --ring: #ef2b39;
+  --ring: #d81f2a;
 
   /* validated categorical palette — dark surface #141417 */
   --chart-1: #3987e5;
@@ -137,4 +139,14 @@
     linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   background-size: 44px 44px;
+}
+
+/* Red accent TEXT. The --primary fill is deliberately dark enough for white
+   text (AA); as text on dark surfaces that same red is too dark, so lighten it
+   in dark mode. Light mode uses the brand red as-is. */
+@utility text-primary-accent {
+  color: var(--primary);
+}
+.dark .text-primary-accent {
+  color: color-mix(in oklab, var(--primary) 58%, #fff);
 }

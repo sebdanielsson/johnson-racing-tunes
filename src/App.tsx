@@ -37,7 +37,7 @@ function App() {
         {/* Hero */}
         <section className="py-10 sm:py-14">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="border-primary/30 bg-primary/10 text-primary inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium dark:text-[color-mix(in_oklab,var(--primary)_68%,#fff)]">
+            <span className="border-primary/30 bg-primary/10 text-primary-accent inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium">
               <span className="relative flex size-1.5">
                 <span className="bg-primary absolute inline-flex size-full animate-ping rounded-full opacity-75" />
                 <span className="bg-primary relative inline-flex size-1.5 rounded-full" />
@@ -53,16 +53,16 @@ function App() {
             copy. Curated across Forza Horizon 6, 5, 4, 3 and Motorsport 7.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Button asChild size="lg">
-              <a href={CHANNEL_URL} target="_blank" rel="noreferrer">
-                <YoutubeIcon className="size-4" />
-                Watch the channel
-              </a>
+            <Button size="lg" render={<a href={CHANNEL_URL} target="_blank" rel="noreferrer" />}>
+              <YoutubeIcon className="size-4" />
+              Watch the channel
             </Button>
-            <Button asChild size="lg" variant="outline">
-              <a href={SHEET_URL} target="_blank" rel="noreferrer">
-                View source sheet
-              </a>
+            <Button
+              size="lg"
+              variant="outline"
+              render={<a href={SHEET_URL} target="_blank" rel="noreferrer" />}
+            >
+              View source sheet
             </Button>
           </div>
 

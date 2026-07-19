@@ -78,7 +78,7 @@ export function TuneCard({ tune, onOpen }: { tune: Tune; onOpen: (tune: Tune) =>
             target="_blank"
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="text-primary inline-flex items-center gap-1 text-xs hover:underline"
+            className="text-primary-accent inline-flex items-center gap-1 text-xs hover:underline"
             title={tune.videoTitle || "Watch on YouTube"}
           >
             Video

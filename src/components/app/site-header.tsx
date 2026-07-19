@@ -23,31 +23,44 @@ export function SiteHeader() {
 
         <div className="ml-auto flex items-center gap-1">
           <RefreshButton />
-          <Button variant="ghost" size="icon" asChild title="Source spreadsheet">
-            <a href={SHEET_URL} target="_blank" rel="noreferrer" aria-label="Source spreadsheet">
-              <Table2 className="size-4" />
-            </a>
+          <Button
+            variant="ghost"
+            size="icon"
+            title="Source spreadsheet"
+            render={
+              <a
+                href={SHEET_URL}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Source spreadsheet"
+              />
+            }
+          >
+            <Table2 className="size-4" />
           </Button>
-          <Button variant="ghost" size="icon" asChild title="GitHub repository">
-            <a
-              href="https://github.com/sebdanielsson/johnson-racing-tunes"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="GitHub repository"
-            >
-              <GithubIcon className="size-4" />
-            </a>
+          <Button
+            variant="ghost"
+            size="icon"
+            title="GitHub repository"
+            render={
+              <a
+                href="https://github.com/sebdanielsson/johnson-racing-tunes"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="GitHub repository"
+              />
+            }
+          >
+            <GithubIcon className="size-4" />
           </Button>
           <ThemeToggle />
           <Button
-            asChild
             size="sm"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 ml-1 hidden sm:inline-flex"
+            className="ml-1 hidden sm:inline-flex"
+            render={<a href={CHANNEL_URL} target="_blank" rel="noreferrer" />}
           >
-            <a href={CHANNEL_URL} target="_blank" rel="noreferrer">
-              <YoutubeIcon className="size-4" />
-              YouTube
-            </a>
+            <YoutubeIcon className="size-4" />
+            YouTube
           </Button>
         </div>
       </div>

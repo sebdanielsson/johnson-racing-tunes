@@ -8,5 +8,5 @@
   "trailingComma": "all",
   "semi": true,
   "printWidth": 100,
-  "ignorePatterns": ["dist/**", "src/data/tunes.json"]
+  "ignorePatterns": ["dist/**", "src/data/tunes.json", "src/components/ui/**"]
 }
