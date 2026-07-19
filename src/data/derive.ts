@@ -35,18 +35,15 @@ function counted(values: string[]): CountOption[] {
   return [...map.entries()].map(([value, count]) => ({ value, count }));
 }
 
-/** Everything the UI needs that depends on the (swappable) dataset. */
-export function computeDerived(tunes: Tune[]): Derived {
+/**
+ * Facet options (class/focus/creator/game) for a set of tunes. Passing a subset
+ * (e.g. the tunes for the selected game) scopes the filter lists to only what
+ * actually exists in that subset.
+ */
+export function computeFilterOptions(tunes: Tune[]): FilterOptions {
   const gameOrder = new Map(tunes.map((t) => [t.game, t.gameOrder]));
-  const games = [...new Set(tunes.map((t) => t.game))].sort(
-    (a, b) => (gameOrder.get(a) ?? 0) - (gameOrder.get(b) ?? 0),
-  );
-  const allCreators = [...new Set(tunes.flatMap((t) => t.creators))].sort((a, b) =>
-    a.localeCompare(b),
-  );
-
   const classOrder = sortedClasses(tunes);
-  const filterOptions: FilterOptions = {
+  return {
     games: counted(tunes.map((t) => t.game)).sort(
       (a, b) => (gameOrder.get(a.value) ?? 0) - (gameOrder.get(b.value) ?? 0),
     ),
@@ -61,6 +58,19 @@ export function computeDerived(tunes: Tune[]): Derived {
       count: tunes.filter((t) => t.madeFor.toLowerCase().includes(value.toLowerCase())).length,
     })).filter((o) => o.count > 0),
   };
+}
+
+/** Everything the UI needs that depends on the (swappable) dataset. */
+export function computeDerived(tunes: Tune[]): Derived {
+  const gameOrder = new Map(tunes.map((t) => [t.game, t.gameOrder]));
+  const games = [...new Set(tunes.map((t) => t.game))].sort(
+    (a, b) => (gameOrder.get(a) ?? 0) - (gameOrder.get(b) ?? 0),
+  );
+  const allCreators = [...new Set(tunes.flatMap((t) => t.creators))].sort((a, b) =>
+    a.localeCompare(b),
+  );
+
+  const filterOptions = computeFilterOptions(tunes);
 
   const stats: Stats = {
     total: tunes.length,
