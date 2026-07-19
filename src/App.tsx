@@ -132,6 +132,7 @@ function App() {
               rel="noreferrer"
               className="hover:text-foreground font-mono text-xs"
               title="View this build's commit on GitHub"
+              aria-label={`View build commit ${COMMIT_SHORT} on GitHub`}
             >
               {COMMIT_SHORT}
             </a>

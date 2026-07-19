@@ -37,7 +37,7 @@ const comparators: Record<SortField, (a: Tune, b: Tune) => number> = {
     a.car.localeCompare(b.car),
 };
 
-/** How many filters are actively narrowing the result set. */
+/** How many filters are currently set (search, facets, and quick toggles). */
 export function activeFilterCount(filters: Filters): number {
   return (
     filters.games.length +
