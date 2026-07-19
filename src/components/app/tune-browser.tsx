@@ -395,7 +395,7 @@ export function TuneBrowser() {
                       {t.class}
                     </Badge>
                   </TableCell>
-                  <TableCell className="px-3 py-3 align-top">
+                  <TableCell className={cn("px-3 py-3", t.info ? "align-top" : "align-middle")}>
                     <div className="max-w-[280px] min-w-[170px]">
                       <div className="flex items-center gap-2">
                         {newSinceIds.has(t.id) && (
