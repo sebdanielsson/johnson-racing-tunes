@@ -77,6 +77,8 @@ function App() {
             The game selector scopes both Browse and Overview. */}
         <Tabs defaultValue="browse" className="gap-6">
           <div className="flex flex-wrap items-center gap-2">
+            {/* Game selector sits to the left — it scopes the Browse/Overview view. */}
+            <GameSwitcher />
             <TabsList>
               <TabsTrigger value="browse">
                 <TableIcon className="size-4" />
@@ -87,7 +89,6 @@ function App() {
                 Overview
               </TabsTrigger>
             </TabsList>
-            <GameSwitcher />
           </div>
 
           {/* min-w-0: the panel is a flex child (Base UI Tabs), so without this
