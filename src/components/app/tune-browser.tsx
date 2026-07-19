@@ -470,10 +470,10 @@ export function TuneBrowser() {
                         href={t.videoUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-primary-accent inline-flex max-w-[150px] items-center gap-1 text-sm hover:underline"
+                        className="text-primary-accent inline-flex items-center gap-1 text-sm hover:underline"
                         title={t.videoTitle || "Watch on YouTube"}
                       >
-                        <span className="truncate">{t.videoTitle || "Watch"}</span>
+                        <span>{t.videoTitle || "Watch"}</span>
                         <ExternalLink className="size-3.5 shrink-0" />
                       </a>
                     ) : (
