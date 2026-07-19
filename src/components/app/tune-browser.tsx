@@ -78,6 +78,8 @@ export function TuneBrowser() {
   const { filters, update, reset, setTune } = useFilters();
   const { tunes, filterOptions } = useData();
   const favorites = useFavorites();
+  // When scoped to a single game, the Game column is redundant.
+  const showGameCol = filters.games.length !== 1;
   const [copied, setCopied] = React.useState(false);
   const searchRef = React.useRef<HTMLInputElement>(null);
 
@@ -367,7 +369,7 @@ export function TuneBrowser() {
                 </TableHead>
                 <SortableHead field="class" label="Class" />
                 <SortableHead field="car" label="Car" />
-                <SortableHead field="game" label="Game" />
+                {showGameCol && <SortableHead field="game" label="Game" />}
                 <TableHead scope="col" className="px-3">
                   Made for
                 </TableHead>
@@ -395,7 +397,7 @@ export function TuneBrowser() {
                       {t.class}
                     </Badge>
                   </TableCell>
-                  <TableCell className={cn("px-3 py-3", t.info ? "align-top" : "align-middle")}>
+                  <TableCell className="px-3 py-3 align-middle">
                     <div className="max-w-[280px] min-w-[170px]">
                       <div className="flex items-center gap-2">
                         {newSinceIds.has(t.id) && (
@@ -415,9 +417,11 @@ export function TuneBrowser() {
                       {t.info && <p className="text-muted-foreground mt-0.5 text-xs">{t.info}</p>}
                     </div>
                   </TableCell>
-                  <TableCell className="px-3 py-3">
-                    <GameBadge game={t.game} />
-                  </TableCell>
+                  {showGameCol && (
+                    <TableCell className="px-3 py-3">
+                      <GameBadge game={t.game} />
+                    </TableCell>
+                  )}
                   <TableCell className="px-3 py-3">
                     {(() => {
                       const tags = t.madeFor
