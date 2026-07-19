@@ -14,7 +14,6 @@ import {
   Table as TableIcon,
   Trash2,
   Video,
-  Sparkles,
   X,
 } from "lucide-react";
 
@@ -217,13 +216,6 @@ export function TuneBrowser() {
             icon={<Star className={cn("size-3.5", filters.favOnly && "fill-current")} />}
           >
             Favorites{favCount > 0 && ` (${favCount})`}
-          </Toggle>
-          <Toggle
-            active={filters.newOnly}
-            onClick={() => update({ newOnly: !filters.newOnly })}
-            icon={<Sparkles className="size-3.5" />}
-          >
-            New
           </Toggle>
           {newSinceIds.size > 0 && (
             <Toggle

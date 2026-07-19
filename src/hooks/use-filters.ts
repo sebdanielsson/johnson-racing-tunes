@@ -16,7 +16,6 @@ export interface Filters {
   focus: string[];
   creators: string[];
   favOnly: boolean;
-  newOnly: boolean;
   hasVideo: boolean;
   sinceOnly: boolean;
   sort: SortField;
@@ -35,7 +34,6 @@ export const DEFAULT_FILTERS: Filters = {
   focus: [],
   creators: [],
   favOnly: false,
-  newOnly: false,
   hasVideo: false,
   sinceOnly: false,
   sort: "class",
@@ -72,7 +70,6 @@ function parseFromUrl(): Filters {
   f.focus = listCommaCompat("focus");
   f.creators = list("creator");
   f.favOnly = p.get("fav") === "1";
-  f.newOnly = p.get("new") === "1";
   f.hasVideo = p.get("video") === "1";
   f.sinceOnly = p.get("since") === "1";
   const sort = p.get("sort");
@@ -103,7 +100,6 @@ function writeToUrl(f: Filters) {
   for (const v of f.focus) p.append("focus", v);
   for (const v of f.creators) p.append("creator", v);
   if (f.favOnly) p.set("fav", "1");
-  if (f.newOnly) p.set("new", "1");
   if (f.hasVideo) p.set("video", "1");
   if (f.sinceOnly) p.set("since", "1");
   if (f.sort !== DEFAULT_FILTERS.sort) p.set("sort", f.sort);
