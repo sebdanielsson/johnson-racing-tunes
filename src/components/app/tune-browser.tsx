@@ -213,11 +213,47 @@ export function TuneBrowser() {
         </div>
       </div>
 
-      {/* Row 2: sort/view controls */}
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          {/* In the table, headers drive sorting. Cards can't be clicked to
-              sort, so they keep a compact sort control. */}
+      {/* Result count + actions + view controls, all on one row to save space */}
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
+        <p className="text-muted-foreground text-sm">
+          <span className="text-foreground font-medium tabular-nums">
+            {results.length.toLocaleString()}
+          </span>{" "}
+          {results.length === 1 ? "tune" : "tunes"}
+          <span className="hidden sm:inline">
+            {filterCount > 0 ? " match your filters" : " in the database"}
+          </span>
+        </p>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {codeCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={copyCodes}
+              title={`Copy ${codeCount} share code${codeCount === 1 ? "" : "s"}`}
+              aria-label={`Copy ${codeCount} share code${codeCount === 1 ? "" : "s"}`}
+            >
+              {copied ? (
+                <Check className="size-4 text-emerald-500" />
+              ) : (
+                <ClipboardCopy className="size-4" />
+              )}
+              <span className="hidden sm:inline">{copied ? "Copied" : "Copy codes"}</span>
+            </Button>
+          )}
+          {filterCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={reset}
+              title="Clear all filters"
+              aria-label="Clear all filters"
+            >
+              <X className="size-4" />
+              <span className="hidden sm:inline">Clear all</span>
+            </Button>
+          )}
+          {/* Cards can't be clicked to sort, so they keep a compact sort control. */}
           {filters.view === "cards" && (
             <>
               <Select
@@ -267,40 +303,6 @@ export function TuneBrowser() {
               <LayoutGrid className="size-4" />
             </ViewButton>
           </div>
-        </div>
-      </div>
-
-      {/* Result count + reset */}
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-muted-foreground text-sm">
-          <span className="text-foreground font-medium tabular-nums">
-            {results.length.toLocaleString()}
-          </span>{" "}
-          {results.length === 1 ? "tune" : "tunes"}
-          {filterCount > 0 ? " match your filters" : " in the database"}
-        </p>
-        <div className="flex items-center gap-1">
-          {codeCount > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={copyCodes}
-              title={`Copy ${codeCount} share code${codeCount === 1 ? "" : "s"}`}
-            >
-              {copied ? (
-                <Check className="size-4 text-emerald-500" />
-              ) : (
-                <ClipboardCopy className="size-4" />
-              )}
-              {copied ? "Copied" : "Copy codes"}
-            </Button>
-          )}
-          {filterCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={reset}>
-              <X className="size-4" />
-              Clear all
-            </Button>
-          )}
         </div>
       </div>
 
