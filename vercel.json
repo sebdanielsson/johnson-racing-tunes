@@ -4,8 +4,8 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/sheets/:path*",
-      "destination": "https://docs.google.com/:path*"
+      "source": "/sheets/spreadsheets/d/1F3xqy6yodUmnuua08YU-fet4KDDoIbaoNZRiZ9U8yxk/:path*",
+      "destination": "https://docs.google.com/spreadsheets/d/1F3xqy6yodUmnuua08YU-fet4KDDoIbaoNZRiZ9U8yxk/:path*"
     }
   ]
 }

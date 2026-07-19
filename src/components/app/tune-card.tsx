@@ -7,13 +7,7 @@ import { GameBadge } from "@/components/app/game-badge";
 import { newSinceIds } from "@/data/seen";
 import type { Tune } from "@/data/tunes";
 
-export function TuneCard({
-  tune,
-  onOpen,
-}: {
-  tune: Tune;
-  onOpen: (tune: Tune) => void;
-}) {
+export function TuneCard({ tune, onOpen }: { tune: Tune; onOpen: (tune: Tune) => void }) {
   const tags = tune.madeFor
     .split(/[\n/]/)
     .map((s) => s.trim())
@@ -30,7 +24,7 @@ export function TuneCard({
           onOpen(tune);
         }
       }}
-      className="flex cursor-pointer flex-col gap-3 rounded-xl border bg-card p-4 text-left transition-colors hover:border-primary/40 focus-visible:border-primary focus-visible:outline-none"
+      className="bg-card hover:border-primary/40 focus-visible:border-primary flex cursor-pointer flex-col gap-3 rounded-xl border p-4 text-left transition-colors focus-visible:outline-none"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5">
@@ -38,11 +32,9 @@ export function TuneCard({
           <Badge variant="outline" className="font-semibold">
             {tune.class}
           </Badge>
-          {tune.isNew && (
-            <Badge className="h-4 px-1.5 text-[10px] leading-none">NEW</Badge>
-          )}
+          {tune.isNew && <Badge className="h-4 px-1.5 text-[10px] leading-none">NEW</Badge>}
         </div>
-        <FavoriteButton id={tune.id} className="-mr-1 -mt-1" />
+        <FavoriteButton id={tune.id} className="-mt-1 -mr-1" />
       </div>
 
       <div className="min-w-0">
@@ -56,7 +48,7 @@ export function TuneCard({
           )}
           <span className="truncate">{tune.car}</span>
         </h3>
-        <p className="truncate text-xs text-muted-foreground">
+        <p className="text-muted-foreground truncate text-xs">
           by {tune.creators.join(", ") || "unknown"}
         </p>
       </div>
@@ -66,7 +58,7 @@ export function TuneCard({
           {tags.slice(0, 3).map((tag, i) => (
             <span
               key={`${tag}-${i}`}
-              className="rounded bg-secondary px-1.5 py-0.5 text-xs text-secondary-foreground"
+              className="bg-secondary text-secondary-foreground rounded px-1.5 py-0.5 text-xs"
             >
               {tag}
             </span>
@@ -78,7 +70,7 @@ export function TuneCard({
         {tune.shareCodes[0] ? (
           <CopyCode code={tune.shareCodes[0]} />
         ) : (
-          <span className="text-xs text-muted-foreground">No code</span>
+          <span className="text-muted-foreground text-xs">No code</span>
         )}
         {tune.videoUrl && (
           <a
@@ -86,7 +78,7 @@ export function TuneCard({
             target="_blank"
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+            className="text-primary inline-flex items-center gap-1 text-xs hover:underline"
             title={tune.videoTitle || "Watch on YouTube"}
           >
             Video

@@ -47,27 +47,38 @@ function parseFromUrl(): Filters {
   const f = { ...DEFAULT_FILTERS };
   if (typeof window === "undefined") return f;
   const p = new URLSearchParams(window.location.search);
-  const list = (k: string) =>
-    p.get(k) ? p.get(k)!.split(",").map(decodeURIComponent).filter(Boolean) : [];
-  if (p.get("q")) f.q = p.get("q")!;
-  f.games = list("game");
-  f.classes = list("class");
-  f.focus = list("focus");
+  // Multi-value filters use repeated keys (?creator=a&creator=b) so values that
+  // themselves contain commas (e.g. "GTz Marple, OnlyNaps") round-trip cleanly.
+  const list = (k: string) => p.getAll(k).filter(Boolean);
+  // game/class/focus values never contain commas, so we can still accept older
+  // comma-joined links for those without ambiguity.
+  const listCommaCompat = (k: string) =>
+    p
+      .getAll(k)
+      .flatMap((v) => v.split(","))
+      .map((s) => s.trim())
+      .filter(Boolean);
+  const q = p.get("q");
+  if (q) f.q = q;
+  f.games = listCommaCompat("game");
+  f.classes = listCommaCompat("class");
+  f.focus = listCommaCompat("focus");
   f.creators = list("creator");
   f.favOnly = p.get("fav") === "1";
   f.newOnly = p.get("new") === "1";
   f.hasVideo = p.get("video") === "1";
   f.hasCode = p.get("code") === "1";
   f.sinceOnly = p.get("since") === "1";
-  if (["car", "class", "game", "creator"].includes(p.get("sort") ?? ""))
-    f.sort = p.get("sort") as SortField;
+  const sort = p.get("sort");
+  if (sort && ["car", "class", "game", "creator"].includes(sort)) f.sort = sort as SortField;
   if (p.get("dir") === "desc") f.dir = "desc";
   if (p.get("view") === "cards") f.view = "cards";
   const size = Number(p.get("size"));
   if ([25, 50, 100].includes(size)) f.size = size;
   const page = Number(p.get("page"));
   if (page > 1) f.page = page;
-  if (p.get("tune")) f.tune = p.get("tune");
+  const tune = p.get("tune");
+  if (tune) f.tune = tune;
   return f;
 }
 
@@ -75,10 +86,11 @@ function writeToUrl(f: Filters) {
   if (typeof window === "undefined") return;
   const p = new URLSearchParams();
   if (f.q) p.set("q", f.q);
-  if (f.games.length) p.set("game", f.games.join(","));
-  if (f.classes.length) p.set("class", f.classes.join(","));
-  if (f.focus.length) p.set("focus", f.focus.join(","));
-  if (f.creators.length) p.set("creator", f.creators.join(","));
+  // Repeated keys per value so commas inside values survive a round-trip.
+  for (const v of f.games) p.append("game", v);
+  for (const v of f.classes) p.append("class", v);
+  for (const v of f.focus) p.append("focus", v);
+  for (const v of f.creators) p.append("creator", v);
   if (f.favOnly) p.set("fav", "1");
   if (f.newOnly) p.set("new", "1");
   if (f.hasVideo) p.set("video", "1");

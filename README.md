@@ -23,7 +23,6 @@ and **Motorsport 7**, searchable, filterable and one tap to copy.
 - [Vite](https://vite.dev) + [React 19](https://react.dev) + TypeScript
 - [Tailwind CSS v4](https://tailwindcss.com)
 - [shadcn/ui](https://ui.shadcn.com) (new-york) + [shadcn charts](https://ui.shadcn.com/charts) / [Recharts](https://recharts.org)
-- [TanStack Table](https://tanstack.com/table)
 - pnpm
 
 ## Development

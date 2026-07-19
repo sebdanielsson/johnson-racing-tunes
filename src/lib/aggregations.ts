@@ -29,8 +29,7 @@ export function byClass(rows: Tune[]): Count[] {
 /** Most prolific creators. */
 export function topCreators(rows: Tune[], limit = 12): Count[] {
   const map = new Map<string, number>();
-  for (const t of rows)
-    for (const c of t.creators) map.set(c, (map.get(c) ?? 0) + 1);
+  for (const t of rows) for (const c of t.creators) map.set(c, (map.get(c) ?? 0) + 1);
   return [...map.entries()]
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value || a.name.localeCompare(b.name))

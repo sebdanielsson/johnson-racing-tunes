@@ -1,11 +1,6 @@
 import { ExternalLink, Info } from "lucide-react";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { CopyCode } from "@/components/app/copy-code";
 import { FavoriteButton } from "@/components/app/favorite-button";
@@ -48,7 +43,7 @@ export function TuneDetail({
                       .map((tag, i) => (
                         <span
                           key={`${tag}-${i}`}
-                          className="rounded bg-secondary px-1.5 py-0.5 text-xs text-secondary-foreground"
+                          className="bg-secondary text-secondary-foreground rounded px-1.5 py-0.5 text-xs"
                         >
                           {tag}
                         </span>
@@ -58,16 +53,10 @@ export function TuneDetail({
               )}
 
               <Field label={tune.creators.length > 1 ? "Creators" : "Creator"}>
-                <span className="text-sm">
-                  {tune.creators.join(", ") || "—"}
-                </span>
+                <span className="text-sm">{tune.creators.join(", ") || "—"}</span>
               </Field>
 
-              <Field
-                label={
-                  tune.shareCodes.length > 1 ? "Share codes" : "Share code"
-                }
-              >
+              <Field label={tune.shareCodes.length > 1 ? "Share codes" : "Share code"}>
                 {tune.shareCodes.length ? (
                   <div className="flex flex-wrap gap-2">
                     {tune.shareCodes.map((c) => (
@@ -75,9 +64,7 @@ export function TuneDetail({
                     ))}
                   </div>
                 ) : (
-                  <span className="text-sm text-muted-foreground">
-                    No share code listed
-                  </span>
+                  <span className="text-muted-foreground text-sm">No share code listed</span>
                 )}
               </Field>
 
@@ -93,13 +80,11 @@ export function TuneDetail({
                   href={tune.videoUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 rounded-lg border p-3 text-sm transition-colors hover:border-primary/50 hover:bg-accent"
+                  className="hover:border-primary/50 hover:bg-accent flex items-center gap-2 rounded-lg border p-3 text-sm transition-colors"
                 >
-                  <YoutubeIcon className="size-5 text-primary" />
-                  <span className="flex-1">
-                    {tune.videoTitle || "Watch on YouTube"}
-                  </span>
-                  <ExternalLink className="size-4 text-muted-foreground" />
+                  <YoutubeIcon className="text-primary size-5" />
+                  <span className="flex-1">{tune.videoTitle || "Watch on YouTube"}</span>
+                  <ExternalLink className="text-muted-foreground size-4" />
                 </a>
               )}
             </div>
@@ -110,16 +95,10 @@ export function TuneDetail({
   );
 }
 
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
         {label}
       </span>
       {children}

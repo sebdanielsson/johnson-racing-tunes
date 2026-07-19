@@ -3,13 +3,7 @@ import { Star } from "lucide-react";
 import { favoritesStore, useFavorites } from "@/hooks/use-favorites";
 import { cn } from "@/lib/utils";
 
-export function FavoriteButton({
-  id,
-  className,
-}: {
-  id: string;
-  className?: string;
-}) {
+export function FavoriteButton({ id, className }: { id: string; className?: string }) {
   const favorites = useFavorites();
   const active = favorites.has(id);
 
@@ -31,9 +25,7 @@ export function FavoriteButton({
       <Star
         className={cn(
           "size-4 transition-colors",
-          active
-            ? "fill-amber-400 text-amber-400"
-            : "text-muted-foreground hover:text-foreground",
+          active ? "fill-amber-400 text-amber-400" : "text-muted-foreground hover:text-foreground",
         )}
       />
     </button>

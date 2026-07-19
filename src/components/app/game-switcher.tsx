@@ -10,11 +10,14 @@ export function GameSwitcher() {
   const { filterOptions, stats } = useData();
   const { filters, update } = useFilters();
   const active = filters.games.length === 1 ? filters.games[0] : null;
+  // "All games" only reflects a truly unfiltered state — a multi-game URL
+  // (?game=FH5&game=FH4) is a real filter, so no pill is highlighted then.
+  const noGameFilter = filters.games.length === 0;
 
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Pill
-        active={active === null}
+        active={noGameFilter}
         onClick={() => update({ games: [] })}
         label="All games"
         count={stats.total}
@@ -87,9 +90,7 @@ function Pill({
       <span
         className={cn(
           "rounded-full px-1.5 text-xs tabular-nums",
-          active
-            ? "bg-background/60 text-foreground"
-            : "bg-muted text-muted-foreground",
+          active ? "bg-background/60 text-foreground" : "bg-muted text-muted-foreground",
         )}
       >
         {count.toLocaleString()}

@@ -25,14 +25,25 @@ const GAME_ORDER: Record<string, number> = {
   FM7: 4,
 };
 const CLASS_ORDER: Record<string, number> = {
-  D: 0, C: 1, B: 2, A: 3, S1: 4, S2: 5, X: 6, R: 7, P: 8,
+  D: 0,
+  C: 1,
+  B: 2,
+  A: 3,
+  S1: 4,
+  S2: 5,
+  X: 6,
+  R: 7,
+  P: 8,
 };
 const LETTER_CLASSES = ["D", "C", "B", "A", "S1", "S2", "X", "R", "P"];
 const HEADER_CELLS = new Set(["CLASS", "CAR CLASS", "CAR DIVISION / CLASS"]);
 
 const clean = (s: string | undefined) => (s ?? "").trim();
 const splitMulti = (s: string) =>
-  (s ?? "").split(/[\r\n]+/).map((x) => x.trim()).filter(Boolean);
+  (s ?? "")
+    .split(/[\r\n]+/)
+    .map((x) => x.trim())
+    .filter(Boolean);
 
 function normClass(c: string): string {
   const b = clean(c)
@@ -54,8 +65,10 @@ export function parseCsv(text: string): string[][] {
     const c = text[i];
     if (quoted) {
       if (c === '"') {
-        if (text[i + 1] === '"') { field += '"'; i++; }
-        else quoted = false;
+        if (text[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else quoted = false;
       } else field += c;
     } else if (c === '"') {
       quoted = true;
@@ -107,7 +120,8 @@ function colmap(header: string[]): Record<string, number> {
 export async function fetchAllTunes(signal?: AbortSignal): Promise<Tune[]> {
   const csvByGame = await Promise.all(
     SHEET_SOURCES.map(async ([, gid]) => {
-      const res = await fetch(sheetUrl(gid), { signal });
+      // Skip the HTTP cache so the refresh button always pulls a live copy.
+      const res = await fetch(sheetUrl(gid), { signal, cache: "no-store" });
       if (!res.ok) throw new Error(`Sheet ${gid} returned ${res.status}`);
       return parseCsv(await res.text());
     }),

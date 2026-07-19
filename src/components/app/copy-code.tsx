@@ -11,9 +11,7 @@ interface CopyCodeProps {
 /** A share code rendered as a click-to-copy chip. */
 export function CopyCode({ code, className }: CopyCodeProps) {
   const [copied, setCopied] = React.useState(false);
-  const timeout = React.useRef<ReturnType<typeof setTimeout> | undefined>(
-    undefined,
-  );
+  const timeout = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   React.useEffect(() => () => clearTimeout(timeout.current), []);
 
@@ -42,7 +40,7 @@ export function CopyCode({ code, className }: CopyCodeProps) {
       {copied ? (
         <Check className="size-3.5 text-emerald-500" />
       ) : (
-        <Copy className="size-3.5 text-muted-foreground group-hover:text-foreground" />
+        <Copy className="text-muted-foreground group-hover:text-foreground size-3.5" />
       )}
     </button>
   );

@@ -41,8 +41,8 @@ export function computeDerived(tunes: Tune[]): Derived {
   const games = [...new Set(tunes.map((t) => t.game))].sort(
     (a, b) => (gameOrder.get(a) ?? 0) - (gameOrder.get(b) ?? 0),
   );
-  const allCreators = [...new Set(tunes.flatMap((t) => t.creators))].sort(
-    (a, b) => a.localeCompare(b),
+  const allCreators = [...new Set(tunes.flatMap((t) => t.creators))].sort((a, b) =>
+    a.localeCompare(b),
   );
 
   const classOrder = sortedClasses(tunes);
@@ -58,9 +58,7 @@ export function computeDerived(tunes: Tune[]): Derived {
     ),
     focus: FOCUS_OPTIONS.map((value) => ({
       value,
-      count: tunes.filter((t) =>
-        t.madeFor.toLowerCase().includes(value.toLowerCase()),
-      ).length,
+      count: tunes.filter((t) => t.madeFor.toLowerCase().includes(value.toLowerCase())).length,
     })).filter((o) => o.count > 0),
   };
 

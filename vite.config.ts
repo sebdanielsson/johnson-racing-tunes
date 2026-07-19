@@ -12,10 +12,10 @@ export default defineConfig({
     },
   },
   server: {
-    // Same-origin proxy to Google Sheets in dev (bypasses CORS). In production
-    // the equivalent rewrite lives in vercel.json.
+    // Same-origin proxy to Google Sheets in dev (bypasses CORS). Scoped to the
+    // single spreadsheet the app reads, mirroring the vercel.json rewrite.
     proxy: {
-      "/sheets": {
+      "/sheets/spreadsheets/d/1F3xqy6yodUmnuua08YU-fet4KDDoIbaoNZRiZ9U8yxk": {
         target: "https://docs.google.com",
         changeOrigin: true,
         secure: true,

@@ -3,6 +3,7 @@ import { useSyncExternalStore } from "react";
 import { initialTunes, type Tune } from "@/data/tunes";
 import { computeDerived, type Derived } from "@/data/derive";
 import { fetchAllTunes } from "@/data/parse";
+import { ingestSeen } from "@/data/seen";
 
 export type RefreshStatus = "idle" | "loading" | "error";
 
@@ -55,6 +56,8 @@ export const dataStore = {
       const tunes = await fetchAllTunes(controller.signal);
       if (controller.signal.aborted) return;
       if (!tunes.length) throw new Error("No tunes returned");
+      // Fold any newly-surfaced ids into the "new since last visit" set.
+      ingestSeen(tunes.map((t) => t.id));
       set(build(tunes, { status: "idle", lastUpdated: Date.now(), error: null }));
     } catch (err) {
       if (controller.signal.aborted) return;
@@ -70,9 +73,5 @@ export const dataStore = {
 };
 
 export function useData(): DataState {
-  return useSyncExternalStore(
-    dataStore.subscribe,
-    dataStore.getSnapshot,
-    () => state,
-  );
+  return useSyncExternalStore(dataStore.subscribe, dataStore.getSnapshot, () => state);
 }
