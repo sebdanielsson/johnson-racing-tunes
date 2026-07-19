@@ -4,6 +4,11 @@ export type SortField = "car" | "class" | "game" | "creator";
 export type SortDir = "asc" | "desc";
 export type ViewMode = "table" | "cards";
 
+// The app opens scoped to the latest game; users can switch or pick "All games".
+export const DEFAULT_GAME = "Forza Horizon 6";
+// URL sentinel so the (empty games = all) state round-trips and stays shareable.
+const ALL_GAMES = "all";
+
 export interface Filters {
   q: string;
   games: string[];
@@ -26,7 +31,7 @@ export interface Filters {
 
 export const DEFAULT_FILTERS: Filters = {
   q: "",
-  games: [],
+  games: [DEFAULT_GAME],
   classes: [],
   focus: [],
   creators: [],
@@ -60,7 +65,11 @@ function parseFromUrl(): Filters {
       .filter(Boolean);
   const q = p.get("q");
   if (q) f.q = q;
-  f.games = listCommaCompat("game");
+  // No game param → keep the default (latest game). `game=all` → every game.
+  if (p.has("game")) {
+    const vals = listCommaCompat("game");
+    f.games = vals.includes(ALL_GAMES) ? [] : vals;
+  }
   f.classes = listCommaCompat("class");
   f.focus = listCommaCompat("focus");
   f.creators = list("creator");
@@ -87,7 +96,10 @@ function writeToUrl(f: Filters) {
   const p = new URLSearchParams();
   if (f.q) p.set("q", f.q);
   // Repeated keys per value so commas inside values survive a round-trip.
-  for (const v of f.games) p.append("game", v);
+  // Empty games means the user chose "All games" — record it explicitly so it
+  // isn't mistaken for the default (latest game) on reload.
+  if (f.games.length === 0) p.set("game", ALL_GAMES);
+  else for (const v of f.games) p.append("game", v);
   for (const v of f.classes) p.append("class", v);
   for (const v of f.focus) p.append("focus", v);
   for (const v of f.creators) p.append("creator", v);
