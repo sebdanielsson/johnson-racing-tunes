@@ -14,8 +14,10 @@ export function GameSwitcher() {
   // (?game=FH5&game=FH4) is a real filter, so no pill is highlighted then.
   const noGameFilter = filters.games.length === 0;
 
+  // Rendered as a fragment so the pills sit in the same wrapping row as the
+  // Browse/Overview tabs (see App.tsx).
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <>
       <Pill
         active={noGameFilter}
         onClick={() => update({ games: [] })}
@@ -33,7 +35,7 @@ export function GameSwitcher() {
           color={gameColorVar[g.value]}
         />
       ))}
-    </div>
+    </>
   );
 }
 
@@ -59,7 +61,7 @@ function Pill({
       title={fullLabel ?? label}
       aria-pressed={active}
       className={cn(
-        "group inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium transition-all cursor-pointer",
+        "group inline-flex h-8 items-center gap-2 rounded-full border px-3 text-sm font-medium transition-all cursor-pointer",
         active
           ? "text-foreground shadow-sm"
           : "border-border bg-card text-muted-foreground hover:border-foreground/20 hover:text-foreground",
@@ -89,7 +91,9 @@ function Pill({
       <span>{label}</span>
       <span
         className={cn(
-          "rounded-full px-1.5 text-xs tabular-nums",
+          // Counts are hidden on mobile to save space (the active count also
+          // shows in the results line); they return on sm+.
+          "hidden rounded-full px-1.5 text-xs tabular-nums sm:inline",
           active ? "bg-background/60 text-foreground" : "bg-muted text-muted-foreground",
         )}
       >
