@@ -14,7 +14,6 @@ import { gameColorVar } from "@/lib/constants";
 import { gameShort } from "@/data/tunes";
 import { useData } from "@/data/store";
 import { useFilters } from "@/hooks/use-filters";
-import { useFavorites } from "@/hooks/use-favorites";
 
 const axisTick = { fill: "var(--muted-foreground)", fontSize: 12 } as const;
 const singleConfig = {
@@ -25,12 +24,8 @@ const gameConfig = { value: { label: "Tunes" } } satisfies ChartConfig;
 export function OverviewCharts() {
   const { tunes } = useData();
   const { filters } = useFilters();
-  const favorites = useFavorites();
 
-  const results = React.useMemo(
-    () => applyFilters(filters, favorites, tunes),
-    [filters, favorites, tunes],
-  );
+  const results = React.useMemo(() => applyFilters(filters, tunes), [filters, tunes]);
   const filtered = activeFilterCount(filters) > 0;
 
   const gameData = React.useMemo(

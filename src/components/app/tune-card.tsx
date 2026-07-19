@@ -2,7 +2,6 @@ import { ExternalLink } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { CopyCode } from "@/components/app/copy-code";
-import { FavoriteButton } from "@/components/app/favorite-button";
 import { GameBadge } from "@/components/app/game-badge";
 import { newSinceIds } from "@/data/seen";
 import type { Tune } from "@/data/tunes";
@@ -26,15 +25,12 @@ export function TuneCard({ tune, onOpen }: { tune: Tune; onOpen: (tune: Tune) =>
       }}
       className="bg-card hover:border-primary/40 focus-visible:border-primary flex cursor-pointer flex-col gap-3 rounded-xl border p-4 text-left transition-colors focus-visible:outline-none"
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <GameBadge game={tune.game} />
-          <Badge variant="outline" className="font-semibold">
-            {tune.class}
-          </Badge>
-          {tune.isNew && <Badge className="h-4 px-1.5 text-[10px] leading-none">NEW</Badge>}
-        </div>
-        <FavoriteButton id={tune.id} className="-mt-1 -mr-1" />
+      <div className="flex flex-wrap items-center gap-1.5">
+        <GameBadge game={tune.game} />
+        <Badge variant="outline" className="font-semibold">
+          {tune.class}
+        </Badge>
+        {tune.isNew && <Badge className="h-4 px-1.5 text-[10px] leading-none">NEW</Badge>}
       </div>
 
       <div className="min-w-0">

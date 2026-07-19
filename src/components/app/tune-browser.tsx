@@ -10,9 +10,7 @@ import {
   ExternalLink,
   LayoutGrid,
   Search,
-  Star,
   Table as TableIcon,
-  Trash2,
   Video,
   X,
 } from "lucide-react";
@@ -36,7 +34,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CopyCode } from "@/components/app/copy-code";
-import { FavoriteButton } from "@/components/app/favorite-button";
 import { GameBadge } from "@/components/app/game-badge";
 import { MultiSelect } from "@/components/app/multi-select";
 import { TuneCard } from "@/components/app/tune-card";
@@ -46,7 +43,6 @@ import { TuneCard } from "@/components/app/tune-card";
 const TuneDetail = React.lazy(() =>
   import("@/components/app/tune-detail").then((m) => ({ default: m.TuneDetail })),
 );
-import { favoritesStore, useFavorites } from "@/hooks/use-favorites";
 import { useFilters, type SortField } from "@/hooks/use-filters";
 import { activeFilterCount, applyFilters } from "@/lib/filtering";
 import { useData } from "@/data/store";
@@ -77,7 +73,6 @@ const PAGE_SIZE_ITEMS: Record<string, string> = {
 export function TuneBrowser() {
   const { filters, update, reset, setTune } = useFilters();
   const { tunes, filterOptions } = useData();
-  const favorites = useFavorites();
   const isMobile = useIsMobile();
   // When scoped to a single game, the Game column is redundant.
   const showGameCol = filters.games.length !== 1;
@@ -123,10 +118,7 @@ export function TuneBrowser() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const results = React.useMemo(
-    () => applyFilters(filters, favorites, tunes),
-    [filters, favorites, tunes],
-  );
+  const results = React.useMemo(() => applyFilters(filters, tunes), [filters, tunes]);
 
   const totalPages = Math.max(1, Math.ceil(results.length / filters.size));
   const page = Math.min(filters.page, totalPages);
@@ -134,8 +126,6 @@ export function TuneBrowser() {
   const pageRows = results.slice(start, start + filters.size);
 
   const filterCount = activeFilterCount(filters);
-
-  const favCount = favorites.size;
   const codeCount = results.filter((t) => t.shareCodes.length).length;
 
   const copyCodes = React.useCallback(async () => {
@@ -204,18 +194,12 @@ export function TuneBrowser() {
             onChange={(v) => update({ creators: v })}
             searchable={!isMobile}
           />
-        </div>
-      </div>
-
-      {/* Row 2: quick toggles + sort/view */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-wrap items-center gap-2">
           <Toggle
-            active={filters.favOnly}
-            onClick={() => update({ favOnly: !filters.favOnly })}
-            icon={<Star className={cn("size-3.5", filters.favOnly && "fill-current")} />}
+            active={filters.hasVideo}
+            onClick={() => update({ hasVideo: !filters.hasVideo })}
+            icon={<Video className="size-3.5" />}
           >
-            Favorites{favCount > 0 && ` (${favCount})`}
+            Video
           </Toggle>
           {newSinceIds.size > 0 && (
             <Toggle
@@ -226,15 +210,11 @@ export function TuneBrowser() {
               New to you ({newSinceIds.size})
             </Toggle>
           )}
-          <Toggle
-            active={filters.hasVideo}
-            onClick={() => update({ hasVideo: !filters.hasVideo })}
-            icon={<Video className="size-3.5" />}
-          >
-            Video
-          </Toggle>
         </div>
+      </div>
 
+      {/* Row 2: sort/view controls */}
+      <div className="flex flex-wrap items-center justify-end gap-2">
         <div className="flex flex-wrap items-center gap-2">
           {/* In the table, headers drive sorting. Cards can't be clicked to
               sort, so they keep a compact sort control. */}
@@ -315,17 +295,6 @@ export function TuneBrowser() {
               {copied ? "Copied" : "Copy codes"}
             </Button>
           )}
-          {filters.favOnly && favCount > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => favoritesStore.clear()}
-              title="Remove all favorites"
-            >
-              <Trash2 className="size-4" />
-              Clear favorites
-            </Button>
-          )}
           {filterCount > 0 && (
             <Button variant="ghost" size="sm" onClick={reset}>
               <X className="size-4" />
@@ -358,9 +327,6 @@ export function TuneBrowser() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead scope="col" className="w-8 px-3">
-                  <span className="sr-only">Favorite</span>
-                </TableHead>
                 <SortableHead field="class" label="Class" />
                 <SortableHead field="car" label="Car" />
                 {showGameCol && <SortableHead field="game" label="Game" />}
@@ -383,9 +349,6 @@ export function TuneBrowser() {
                   className="group cursor-pointer align-top"
                   onClick={() => setActive(t)}
                 >
-                  <TableCell className="px-3 py-3">
-                    <FavoriteButton id={t.id} />
-                  </TableCell>
                   <TableCell className="px-3 py-3">
                     <Badge variant="outline" className="font-semibold">
                       {t.class}

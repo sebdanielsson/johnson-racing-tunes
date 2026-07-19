@@ -44,14 +44,13 @@ export function activeFilterCount(filters: Filters): number {
     filters.classes.length +
     filters.focus.length +
     filters.creators.length +
-    (filters.favOnly ? 1 : 0) +
     (filters.sinceOnly ? 1 : 0) +
     (filters.hasVideo ? 1 : 0) +
     (filters.q.trim() ? 1 : 0)
   );
 }
 
-export function applyFilters(filters: Filters, favorites: Set<string>, rows: Tune[]): Tune[] {
+export function applyFilters(filters: Filters, rows: Tune[]): Tune[] {
   const q = filters.q.trim().toLowerCase();
   let out = rows.filter((t) => {
     if (q && !matchesQuery(t, q)) return false;
@@ -63,7 +62,6 @@ export function applyFilters(filters: Filters, favorites: Set<string>, rows: Tun
       const hay = t.madeFor.toLowerCase();
       if (!filters.focus.some((f) => hay.includes(f.toLowerCase()))) return false;
     }
-    if (filters.favOnly && !favorites.has(t.id)) return false;
     if (filters.sinceOnly && !newSinceIds.has(t.id)) return false;
     if (filters.hasVideo && !t.videoUrl) return false;
     return true;
