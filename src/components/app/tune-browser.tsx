@@ -441,9 +441,17 @@ export function TuneBrowser() {
                     })()}
                   </TableCell>
                   <TableCell className="px-3 py-3">
-                    <div className="text-muted-foreground max-w-[150px] text-sm">
-                      {t.creators.join(", ") || "—"}
-                    </div>
+                    {t.creators.length ? (
+                      <div className="text-muted-foreground flex max-w-[160px] flex-col gap-0.5 text-sm">
+                        {t.creators.map((c, i) => (
+                          <span key={`${c}-${i}`} className="truncate" title={c}>
+                            {c}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </TableCell>
                   <TableCell className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
                     {t.shareCodes.length ? (
