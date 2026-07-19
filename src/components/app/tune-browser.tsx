@@ -53,6 +53,7 @@ import { useFilters, type SortField } from "@/hooks/use-filters";
 import { activeFilterCount, applyFilters } from "@/lib/filtering";
 import { useData } from "@/data/store";
 import { computeFilterOptions } from "@/data/derive";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { newSinceIds } from "@/data/seen";
 import type { Tune } from "@/data/tunes";
 import { cn } from "@/lib/utils";
@@ -79,6 +80,7 @@ export function TuneBrowser() {
   const { filters, update, reset, setTune } = useFilters();
   const { tunes, filterOptions } = useData();
   const favorites = useFavorites();
+  const isMobile = useIsMobile();
   // When scoped to a single game, the Game column is redundant.
   const showGameCol = filters.games.length !== 1;
 
@@ -202,7 +204,7 @@ export function TuneBrowser() {
             options={gameOptions.creators}
             selected={filters.creators}
             onChange={(v) => update({ creators: v })}
-            searchable
+            searchable={!isMobile}
           />
         </div>
       </div>
