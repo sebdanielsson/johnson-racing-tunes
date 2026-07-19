@@ -96,17 +96,17 @@ export function TuneBrowser() {
     () => tunes.find((t) => t.id === filters.tune) ?? null,
     [filters.tune, tunes],
   );
+  // Mount the lazy detail dialog on first open (or when deep-linked via the
+  // URL), then keep it mounted so its open/close transitions still run. Set it
+  // synchronously on open so the click doesn't wait a render for the effect.
+  const [detailMounted, setDetailMounted] = React.useState(() => filters.tune !== null);
   const setActive = React.useCallback(
-    (tune: Tune | null) => setTune(tune ? tune.id : null),
+    (tune: Tune | null) => {
+      if (tune) setDetailMounted(true);
+      setTune(tune ? tune.id : null);
+    },
     [setTune],
   );
-
-  // Mount the lazy detail dialog on first open, then keep it mounted so its
-  // open/close transitions still run.
-  const [detailMounted, setDetailMounted] = React.useState(false);
-  React.useEffect(() => {
-    if (active) setDetailMounted(true);
-  }, [active]);
 
   // "/" focuses search; Escape blurs it while it's focused.
   React.useEffect(() => {
@@ -456,13 +456,13 @@ export function TuneBrowser() {
                     {t.creators.length ? (
                       <div className="text-muted-foreground flex max-w-[160px] flex-col gap-0.5 text-sm">
                         {t.creators.map((c, i) => (
-                          <span key={`${c}-${i}`} className="truncate" title={c}>
+                          <span key={`${c}-${i}`} className="min-w-0 truncate" title={c}>
                             {c}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground text-sm">—</span>
                     )}
                   </TableCell>
                   <TableCell className="px-3 py-3" onClick={(e) => e.stopPropagation()}>

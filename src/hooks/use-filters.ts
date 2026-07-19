@@ -63,7 +63,7 @@ function parseFromUrl(): Filters {
       .flatMap((v) => v.split(","))
       .map((s) => s.trim())
       .filter(Boolean);
-  const q = p.get("q");
+  const q = p.get("q")?.trim();
   if (q) f.q = q;
   // No game param → keep the default (latest game). `game=all` → every game.
   if (p.has("game")) {
@@ -94,12 +94,14 @@ function parseFromUrl(): Filters {
 function writeToUrl(f: Filters) {
   if (typeof window === "undefined") return;
   const p = new URLSearchParams();
-  if (f.q) p.set("q", f.q);
+  const q = f.q.trim();
+  if (q) p.set("q", q);
   // Repeated keys per value so commas inside values survive a round-trip.
-  // Empty games means the user chose "All games" — record it explicitly so it
-  // isn't mistaken for the default (latest game) on reload.
+  // Empty games = the user chose "All games" — record it explicitly so it isn't
+  // mistaken for the default. The default game is left off for a clean URL.
+  const isDefaultGame = f.games.length === 1 && f.games[0] === DEFAULT_GAME;
   if (f.games.length === 0) p.set("game", ALL_GAMES);
-  else for (const v of f.games) p.append("game", v);
+  else if (!isDefaultGame) for (const v of f.games) p.append("game", v);
   for (const v of f.classes) p.append("class", v);
   for (const v of f.focus) p.append("focus", v);
   for (const v of f.creators) p.append("creator", v);
