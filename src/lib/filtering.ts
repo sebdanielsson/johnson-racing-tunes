@@ -48,7 +48,6 @@ export function activeFilterCount(filters: Filters): number {
     (filters.newOnly ? 1 : 0) +
     (filters.sinceOnly ? 1 : 0) +
     (filters.hasVideo ? 1 : 0) +
-    (filters.hasCode ? 1 : 0) +
     (filters.q.trim() ? 1 : 0)
   );
 }
@@ -69,7 +68,6 @@ export function applyFilters(filters: Filters, favorites: Set<string>, rows: Tun
     if (filters.newOnly && !t.isNew) return false;
     if (filters.sinceOnly && !newSinceIds.has(t.id)) return false;
     if (filters.hasVideo && !t.videoUrl) return false;
-    if (filters.hasCode && t.shareCodes.length === 0) return false;
     return true;
   });
 

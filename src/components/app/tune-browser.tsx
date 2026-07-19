@@ -14,7 +14,6 @@ import {
   Table as TableIcon,
   Trash2,
   Video,
-  KeyRound,
   Sparkles,
   X,
 } from "lucide-react";
@@ -71,9 +70,9 @@ const SORT_ITEMS: Record<string, string> = Object.fromEntries(
   (Object.keys(SORT_LABELS) as SortField[]).map((k) => [k, `Sort: ${SORT_LABELS[k]}`]),
 );
 const PAGE_SIZE_ITEMS: Record<string, string> = {
-  "25": "25 / page",
-  "50": "50 / page",
-  "100": "100 / page",
+  "25": "25",
+  "50": "50",
+  "100": "100",
 };
 
 export function TuneBrowser() {
@@ -242,13 +241,6 @@ export function TuneBrowser() {
           >
             Video
           </Toggle>
-          <Toggle
-            active={filters.hasCode}
-            onClick={() => update({ hasCode: !filters.hasCode })}
-            icon={<KeyRound className="size-3.5" />}
-          >
-            Share code
-          </Toggle>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -381,7 +373,7 @@ export function TuneBrowser() {
                 <SortableHead field="car" label="Car" />
                 {showGameCol && <SortableHead field="game" label="Game" />}
                 <TableHead scope="col" className="px-3">
-                  Made for
+                  Focus
                 </TableHead>
                 <SortableHead field="creator" label="Creator" />
                 <TableHead scope="col" className="px-3">
@@ -514,13 +506,13 @@ export function TuneBrowser() {
               value={String(filters.size)}
               onValueChange={(v) => update({ size: Number(v) })}
             >
-              <SelectTrigger size="sm" className="w-[110px]" aria-label="Tunes per page">
+              <SelectTrigger size="sm" className="w-[72px]" aria-label="Tunes per page">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {[25, 50, 100].map((n) => (
                   <SelectItem key={n} value={String(n)}>
-                    {n} / page
+                    {n}
                   </SelectItem>
                 ))}
               </SelectContent>

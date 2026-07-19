@@ -18,7 +18,6 @@ export interface Filters {
   favOnly: boolean;
   newOnly: boolean;
   hasVideo: boolean;
-  hasCode: boolean;
   sinceOnly: boolean;
   sort: SortField;
   dir: SortDir;
@@ -38,7 +37,6 @@ export const DEFAULT_FILTERS: Filters = {
   favOnly: false,
   newOnly: false,
   hasVideo: false,
-  hasCode: false,
   sinceOnly: false,
   sort: "class",
   dir: "asc",
@@ -76,7 +74,6 @@ function parseFromUrl(): Filters {
   f.favOnly = p.get("fav") === "1";
   f.newOnly = p.get("new") === "1";
   f.hasVideo = p.get("video") === "1";
-  f.hasCode = p.get("code") === "1";
   f.sinceOnly = p.get("since") === "1";
   const sort = p.get("sort");
   if (sort && ["car", "class", "game", "creator"].includes(sort)) f.sort = sort as SortField;
@@ -108,7 +105,6 @@ function writeToUrl(f: Filters) {
   if (f.favOnly) p.set("fav", "1");
   if (f.newOnly) p.set("new", "1");
   if (f.hasVideo) p.set("video", "1");
-  if (f.hasCode) p.set("code", "1");
   if (f.sinceOnly) p.set("since", "1");
   if (f.sort !== DEFAULT_FILTERS.sort) p.set("sort", f.sort);
   if (f.dir !== DEFAULT_FILTERS.dir) p.set("dir", f.dir);
