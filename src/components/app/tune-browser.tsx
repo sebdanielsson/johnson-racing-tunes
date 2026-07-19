@@ -52,6 +52,7 @@ import { favoritesStore, useFavorites } from "@/hooks/use-favorites";
 import { useFilters, type SortField } from "@/hooks/use-filters";
 import { activeFilterCount, applyFilters } from "@/lib/filtering";
 import { useData } from "@/data/store";
+import { computeFilterOptions } from "@/data/derive";
 import { newSinceIds } from "@/data/seen";
 import type { Tune } from "@/data/tunes";
 import { cn } from "@/lib/utils";
@@ -80,6 +81,13 @@ export function TuneBrowser() {
   const favorites = useFavorites();
   // When scoped to a single game, the Game column is redundant.
   const showGameCol = filters.games.length !== 1;
+
+  // Scope the Class/Focus/Creator lists to the selected game so we don't offer
+  // options (e.g. Motorsport-only classes) that don't exist in the chosen game.
+  const gameOptions = React.useMemo(() => {
+    if (!filters.games.length) return filterOptions;
+    return computeFilterOptions(tunes.filter((t) => filters.games.includes(t.game)));
+  }, [tunes, filters.games, filterOptions]);
   const [copied, setCopied] = React.useState(false);
   const searchRef = React.useRef<HTMLInputElement>(null);
 
@@ -179,19 +187,19 @@ export function TuneBrowser() {
         <div className="flex flex-wrap items-center gap-2">
           <MultiSelect
             label="Class"
-            options={filterOptions.classes}
+            options={gameOptions.classes}
             selected={filters.classes}
             onChange={(v) => update({ classes: v })}
           />
           <MultiSelect
             label="Focus"
-            options={filterOptions.focus}
+            options={gameOptions.focus}
             selected={filters.focus}
             onChange={(v) => update({ focus: v })}
           />
           <MultiSelect
             label="Creator"
-            options={filterOptions.creators}
+            options={gameOptions.creators}
             selected={filters.creators}
             onChange={(v) => update({ creators: v })}
             searchable
