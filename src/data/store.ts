@@ -38,15 +38,13 @@ function set(next: DataState) {
 let inFlight: AbortController | null = null;
 
 export const dataStore = {
-  subscribe(listener: () => void) {
+  subscribe: (listener: () => void) => {
     listeners.add(listener);
     return () => listeners.delete(listener);
   },
-  getSnapshot() {
-    return state;
-  },
+  getSnapshot: () => state,
   /** Re-fetch every sheet through the proxy and swap in the fresh dataset. */
-  async refresh() {
+  refresh: async () => {
     if (state.status === "loading") return;
     inFlight?.abort();
     const controller = new AbortController();

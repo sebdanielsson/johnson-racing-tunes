@@ -123,24 +123,22 @@ function commit(next: Filters) {
 }
 
 export const filtersStore = {
-  subscribe(listener: () => void) {
+  subscribe: (listener: () => void) => {
     listeners.add(listener);
     return () => listeners.delete(listener);
   },
-  getSnapshot() {
-    return filters;
-  },
+  getSnapshot: () => filters,
   /** Merge a patch; any change other than page itself resets to page 1. */
-  update(patch: Partial<Filters>) {
+  update: (patch: Partial<Filters>) => {
     const next = { ...filters, ...patch };
     if (!("page" in patch)) next.page = 1;
     commit(next);
   },
-  reset() {
+  reset: () => {
     commit({ ...DEFAULT_FILTERS, view: filters.view });
   },
   /** Open/close a tune without disturbing pagination. */
-  setTune(id: string | null) {
+  setTune: (id: string | null) => {
     commit({ ...filters, tune: id });
   },
 };
