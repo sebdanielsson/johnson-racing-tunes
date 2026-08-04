@@ -47,17 +47,27 @@ const GAME_BY_CODE: Record<string, { name: string; order: number }> = {
   FM7: { name: "Forza Motorsport 7", order: 4 },
 };
 
-const CLASS_ORDER_MAP: Record<string, number> = {
-  D: 0,
-  C: 1,
-  B: 2,
-  A: 3,
-  S1: 4,
-  S2: 5,
-  X: 6,
-  R: 7,
-  P: 8,
-};
+/**
+ * Canonical performance-class ordering, best → worst. "P" only shows up as a
+ * Motorsport PI class (998 PI), but it tops the ladder wherever it appears.
+ */
+const LETTER_CLASSES = ["P", "X", "R", "S2", "S1", "A", "B", "C", "D"];
+const LETTER_RANK: Record<string, number> = Object.fromEntries(
+  LETTER_CLASSES.map((c, i) => [c, i]),
+);
+
+/**
+ * Sort rank for a class name, best first. Horizon uses the letter ladder above;
+ * Motorsport spells its classes out ("Hypercar / 900 PI"), so those are ranked
+ * by their PI number and grouped after the letters. Unknown classes sort last.
+ */
+export function classRank(cls: string): number {
+  const letter = LETTER_RANK[cls];
+  if (letter !== undefined) return letter;
+  const pi = /(\d+)\s*PI/.exec(cls);
+  if (pi) return 100 + (1000 - Number(pi[1]));
+  return 9999;
+}
 
 /** The dataset baked at build time — used as the instant, offline-safe seed. */
 export const initialTunes: Tune[] = packed.rows.map((row, i) => {
@@ -70,7 +80,7 @@ export const initialTunes: Tune[] = packed.rows.map((row, i) => {
     gameCode: code,
     gameOrder: game.order,
     class: cls,
-    classOrder: CLASS_ORDER_MAP[cls] ?? 50,
+    classOrder: classRank(cls),
     car: packed.cars[carIdx],
     madeFor: packed.madeFor[mfIdx],
     creators: creatorIdx.map((ci) => packed.creators[ci]),
@@ -91,19 +101,9 @@ export const gameShort: Record<string, string> = {
   "Forza Motorsport 7": "FM7",
 };
 
-/** Canonical performance-class ordering for the letter classes. */
-const LETTER_CLASSES = ["D", "C", "B", "A", "S1", "S2", "X", "R", "P"];
-
 export function sortedClasses(subset: Tune[]): string[] {
   const present = [...new Set(subset.map((t) => t.class))];
-  return present.sort((a, b) => {
-    const ia = LETTER_CLASSES.indexOf(a);
-    const ib = LETTER_CLASSES.indexOf(b);
-    if (ia !== -1 && ib !== -1) return ia - ib;
-    if (ia !== -1) return -1;
-    if (ib !== -1) return 1;
-    return a.localeCompare(b);
-  });
+  return present.sort((a, b) => classRank(a) - classRank(b) || a.localeCompare(b));
 }
 
 export function isLetterClass(c: string): boolean {

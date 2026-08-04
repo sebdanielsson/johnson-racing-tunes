@@ -15,7 +15,7 @@ export function byGame(rows: Tune[]): Count[] {
     .sort((a, b) => (order.get(a.name) ?? 0) - (order.get(b.name) ?? 0));
 }
 
-/** Tunes grouped by the letter performance class (D → R ladder). */
+/** Tunes grouped by the letter performance class (X → D ladder). */
 export function byClass(rows: Tune[]): Count[] {
   const letters = rows.filter((t) => isLetterClass(t.class));
   const map = new Map<string, number>();
