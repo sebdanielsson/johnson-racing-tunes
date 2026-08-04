@@ -2,7 +2,7 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "ignorePatterns": ["dist/**", "src/components/ui/**"],
   "options": {
-    "typeAware": true
+    "typeAware": true,
     "typeCheck": true
   }
 }
