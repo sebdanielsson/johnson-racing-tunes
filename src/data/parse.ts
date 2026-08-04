@@ -1,4 +1,4 @@
-import type { Tune } from "@/data/tunes";
+import { classRank, isLetterClass, type Tune } from "@/data/tunes";
 
 // One entry per Forza game: [display name, sheet gid, short code].
 export const SHEET_SOURCES: [string, string, string][] = [
@@ -24,18 +24,6 @@ const GAME_ORDER: Record<string, number> = {
   FH3: 3,
   FM7: 4,
 };
-const CLASS_ORDER: Record<string, number> = {
-  D: 0,
-  C: 1,
-  B: 2,
-  A: 3,
-  S1: 4,
-  S2: 5,
-  X: 6,
-  R: 7,
-  P: 8,
-};
-const LETTER_CLASSES = ["D", "C", "B", "A", "S1", "S2", "X", "R", "P"];
 const HEADER_CELLS = new Set(["CLASS", "CAR CLASS", "CAR DIVISION / CLASS"]);
 
 const clean = (s: string | undefined) => (s ?? "").trim();
@@ -52,7 +40,7 @@ function normClass(c: string): string {
     .replace(" CLASS", "")
     .replace("CLASS", "")
     .trim();
-  return LETTER_CLASSES.includes(b) ? b : clean(c);
+  return isLetterClass(b) ? b : clean(c);
 }
 
 /** Minimal RFC4180 CSV parser (handles quotes, commas and embedded newlines). */
@@ -160,7 +148,7 @@ export async function fetchAllTunes(signal?: AbortSignal): Promise<Tune[]> {
         gameCode: code,
         gameOrder: GAME_ORDER[code] ?? 99,
         class: cls,
-        classOrder: CLASS_ORDER[cls] ?? 50,
+        classOrder: classRank(cls),
         car,
         madeFor: g("madeFor"),
         creators,
