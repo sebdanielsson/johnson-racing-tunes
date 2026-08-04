@@ -14,6 +14,7 @@ import { gameColorVar } from "@/lib/constants";
 import { gameShort } from "@/data/tunes";
 import { useData } from "@/data/store";
 import { useFilters } from "@/hooks/use-filters";
+import { cn } from "@/lib/utils";
 
 const axisTick = { fill: "var(--muted-foreground)", fontSize: 12 } as const;
 const singleConfig = {
@@ -37,6 +38,7 @@ export function OverviewCharts() {
       })),
     [results],
   );
+  const showGameChart = gameData.length > 1;
   const classData = React.useMemo(() => byClass(results), [results]);
   const creatorData = React.useMemo(() => topCreators(results, 12), [results]);
   const focusData = React.useMemo(() => byFocus(results), [results]);
@@ -63,56 +65,64 @@ export function OverviewCharts() {
         </div>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
-          <ChartCard
-            title="Tunes by game"
-            description="Coverage across the Forza titles"
-            data={gameData}
-          >
-            <ChartContainer config={gameConfig} className="h-[260px] w-full min-w-0">
-              <BarChart
-                accessibilityLayer
-                data={gameData}
-                margin={{ top: 24, right: 8, left: 8, bottom: 0 }}
-              >
-                <CartesianGrid vertical={false} stroke="var(--border)" />
-                <XAxis
-                  dataKey="short"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  tick={axisTick}
-                />
-                <ChartTooltip
-                  cursor={{ fill: "var(--muted)", opacity: 0.4 }}
-                  content={
-                    <ChartTooltipContent
-                      hideIndicator
-                      labelFormatter={(_, p) => p?.[0]?.payload?.name ?? ""}
-                    />
-                  }
-                />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={72}>
-                  {gameData.map((d) => (
-                    <Cell key={d.name} fill={d.fill} />
-                  ))}
-                  <LabelList
-                    dataKey="value"
-                    position="top"
-                    className="fill-foreground"
-                    fontSize={12}
-                    fontWeight={600}
+          {/* Scoped to a single game this would be a one-bar bar chart — the
+              count is already on the game chip and the stat tiles. */}
+          {showGameChart && (
+            <ChartCard
+              title="Tunes by game"
+              description="Coverage across the Forza titles"
+              data={gameData}
+            >
+              <ChartContainer config={gameConfig} className="h-[260px] w-full min-w-0">
+                <BarChart
+                  accessibilityLayer
+                  data={gameData}
+                  margin={{ top: 24, right: 8, left: 8, bottom: 0 }}
+                >
+                  <CartesianGrid vertical={false} stroke="var(--border)" />
+                  <XAxis
+                    dataKey="short"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    tick={axisTick}
                   />
-                </Bar>
-              </BarChart>
-            </ChartContainer>
-          </ChartCard>
+                  <ChartTooltip
+                    cursor={{ fill: "var(--muted)", opacity: 0.4 }}
+                    content={
+                      <ChartTooltipContent
+                        hideIndicator
+                        labelFormatter={(_, p) => p?.[0]?.payload?.name ?? ""}
+                      />
+                    }
+                  />
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={24}>
+                    {gameData.map((d) => (
+                      <Cell key={d.name} fill={d.fill} />
+                    ))}
+                    <LabelList
+                      dataKey="value"
+                      position="top"
+                      className="fill-foreground"
+                      fontSize={12}
+                      fontWeight={600}
+                    />
+                  </Bar>
+                </BarChart>
+              </ChartContainer>
+            </ChartCard>
+          )}
 
           <ChartCard
             title="Tunes by class"
-            description="Performance-class ladder (D → R)"
+            description="Performance-class ladder (X → D)"
             data={classData}
           >
-            <ChartContainer config={singleConfig} className="h-[260px] w-full min-w-0">
+            {/* Matches whichever card shares its row. */}
+            <ChartContainer
+              config={singleConfig}
+              className={cn("w-full min-w-0", showGameChart ? "h-[260px]" : "h-[360px]")}
+            >
               <BarChart
                 accessibilityLayer
                 data={classData}
@@ -134,7 +144,7 @@ export function OverviewCharts() {
                   dataKey="value"
                   fill="var(--color-value)"
                   radius={[4, 4, 0, 0]}
-                  maxBarSize={56}
+                  maxBarSize={24}
                 >
                   <LabelList
                     dataKey="value"
@@ -196,6 +206,7 @@ export function OverviewCharts() {
             title="Tune focus"
             description="What builds are made for (tunes may span several)"
             data={focusData}
+            className={showGameChart ? undefined : "lg:col-span-2"}
           >
             <ChartContainer config={singleConfig} className="h-[360px] w-full min-w-0">
               <BarChart
@@ -245,15 +256,17 @@ function ChartCard({
   title,
   description,
   data,
+  className,
   children,
 }: {
   title: string;
   description: string;
   data: unknown[];
+  className?: string;
   children: React.ReactNode;
 }) {
   return (
-    <Card className="min-w-0">
+    <Card className={cn("min-w-0", className)}>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
@@ -263,7 +276,7 @@ function ChartCard({
           children
         ) : (
           <div className="text-muted-foreground flex h-[220px] items-center justify-center text-sm">
-            Not enough data for this selection.
+            {"Not enough data for this selection."}
           </div>
         )}
       </CardContent>

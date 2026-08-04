@@ -32,9 +32,8 @@ export function StatTiles() {
               <t.icon className="size-5" />
             </div>
             <div className="min-w-0">
-              <div className="text-2xl leading-none font-bold tabular-nums">
-                {t.value.toLocaleString()}
-              </div>
+              {/* Proportional figures: tabular digits read loose at display sizes. */}
+              <div className="text-2xl leading-none font-bold">{t.value.toLocaleString()}</div>
               <div className="text-muted-foreground mt-1 truncate text-xs">{t.label}</div>
             </div>
           </div>
