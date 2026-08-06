@@ -25,7 +25,10 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: "autoUpdate",
+      // The app registers the worker itself (see hooks/use-app-update.ts) so it
+      // can decide when to check for a new build and when to swap it in.
+      registerType: "prompt",
+      injectRegister: false,
       includeAssets: ["favicon.svg", "apple-touch-icon-180x180.png"],
       manifest: {
         name: "Johnson Racing Tunes",
@@ -62,8 +65,10 @@ export default defineConfig({
         // SPA shell.
         navigateFallbackDenylist: [/^\/sheets\//],
         cleanupOutdatedCaches: true,
+        // A new worker waits until the app applies it, then claims the page —
+        // which reloads it onto the new build.
         clientsClaim: true,
-        skipWaiting: true,
+        skipWaiting: false,
         runtimeCaching: [
           {
             // Keep the most recent live refresh available offline.

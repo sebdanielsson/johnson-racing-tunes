@@ -11,6 +11,7 @@ import { TuneBrowser } from "@/components/app/tune-browser";
 import { CHANNEL_URL, COMMIT_SHORT, COMMIT_URL, REPO_URL, SHEET_URL } from "@/lib/constants";
 import { useData } from "@/data/store";
 import { useAutoRefresh } from "@/hooks/use-auto-refresh";
+import { useAppUpdate } from "@/hooks/use-app-update";
 
 // Recharts is heavy — only load the charts when the Overview tab is opened.
 const OverviewCharts = lazy(() =>
@@ -22,6 +23,7 @@ const OverviewCharts = lazy(() =>
 function App() {
   const { games } = useData();
   useAutoRefresh();
+  useAppUpdate();
   return (
     <div className="bg-background min-h-screen">
       <div className="bg-grid pointer-events-none fixed inset-0 -z-10 opacity-60" />
