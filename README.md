@@ -70,8 +70,9 @@ to the browser, an app that is resumed rather than cold-started can sit on a
 weeks-old build (the commit in the footer says which one).
 [`src/hooks/use-app-update.ts`](src/hooks/use-app-update.ts) registers the
 service worker itself and checks for a new one on start, hourly while open, on
-resume (at most every 15 min) and when connectivity returns. Checks are
-best-effort — offline, the installed build simply keeps running.
+resume and when connectivity returns. On a phone the resume check is the one
+that carries it — a suspended PWA doesn't run timers. Checks are best-effort —
+offline, the installed build simply keeps running.
 
 A new build only takes effect on reload, so it is applied when that can't
 interrupt: just after opening the app, while it is backgrounded, or on returning

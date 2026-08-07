@@ -41,11 +41,15 @@ export function useAppUpdate() {
       apply?.();
     };
 
-    // The swap is only complete once the new worker controls the page — until
-    // then this document is still running the old build's JS. Reload only for a
-    // handover we asked for, never for the claim after a first-visit install.
+    // Was a worker already in charge when this page loaded? If so, any handover
+    // means a new build took over — either ours, or one applied by another open
+    // tab. Either way this document is now running superseded JS whose lazily
+    // imported chunks are gone from the cache, so it has to reload. The one
+    // handover that isn't an update is the first-visit install claiming a page
+    // that started out uncontrolled; `applying` still catches a real swap there.
+    const wasControlled = navigator.serviceWorker?.controller != null;
     const onControllerChange = () => {
-      if (applying) window.location.reload();
+      if (applying || wasControlled) window.location.reload();
     };
     navigator.serviceWorker?.addEventListener("controllerchange", onControllerChange);
 
@@ -65,6 +69,9 @@ export function useAppUpdate() {
       // The reload is ours to time (see below), not the plugin's.
       onNeedReload() {},
       onNeedRefresh() {
+        // Fires twice for the same build (once on `installed`, once on
+        // `waiting`); the first one already armed the swap.
+        if (pending || applying) return;
         // Hands over to the waiting worker; the page reloads once it takes
         // control.
         pending = () => {
@@ -97,7 +104,9 @@ export function useAppUpdate() {
           return;
         }
       }
-      if (Date.now() - lastCheck > RESUME_CHECK_MS) check();
+      // Arriving is always worth a check — otherwise the resume throttle, which
+      // is longer than AWAY_MS, would skip the one check that matters most.
+      if (away > AWAY_MS || Date.now() - lastCheck > RESUME_CHECK_MS) check();
     };
 
     const interval = window.setInterval(check, CHECK_INTERVAL_MS);
