@@ -65,6 +65,13 @@ const PAGE_SIZE_ITEMS: Record<string, string> = {
   "100": "100",
 };
 
+// Phones pack the columns together — 4px a side, so 8px between neighbours —
+// but the outermost edges keep their 8px so the content doesn't run into the
+// table's own border. Desktop keeps a uniform 12px throughout.
+const COL_X = "px-1 sm:px-3";
+const COL_X_FIRST = "pr-1 pl-2 sm:px-3";
+const COL_X_LAST = "pr-2 pl-1 sm:px-3";
+
 export function TuneBrowser() {
   const { filters, update, reset, setTune } = useFilters();
   const { tunes, filterOptions } = useData();
@@ -331,17 +338,17 @@ export function TuneBrowser() {
           <Table className="text-xs sm:text-sm">
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <SortableHead field="class" label="Class" shortLabel="Cls" />
+                <SortableHead field="class" label="Class" className={COL_X_FIRST} />
                 <SortableHead field="car" label="Car" />
                 {showGameCol && <SortableHead field="game" label="Game" />}
-                <TableHead scope="col" className="px-2 sm:px-3">
+                <TableHead scope="col" className={COL_X}>
                   Focus
                 </TableHead>
                 <SortableHead field="creator" label="Creator" />
-                <TableHead scope="col" className="px-2 sm:px-3">
+                <TableHead scope="col" className={COL_X}>
                   Share code
                 </TableHead>
-                <TableHead scope="col" className="px-2 sm:px-3">
+                <TableHead scope="col" className={COL_X_LAST}>
                   Video
                 </TableHead>
               </TableRow>
@@ -353,12 +360,12 @@ export function TuneBrowser() {
                   className="group cursor-pointer align-top"
                   onClick={() => setActive(t)}
                 >
-                  <TableCell className="px-2 py-3 sm:px-3">
-                    <Badge variant="outline" className="px-1.5 font-semibold sm:px-2">
+                  <TableCell className={cn(COL_X_FIRST, "py-3")}>
+                    <Badge variant="outline" className="font-semibold">
                       {t.class}
                     </Badge>
                   </TableCell>
-                  <TableCell className="px-2 py-3 align-middle sm:px-3">
+                  <TableCell className={cn(COL_X, "py-3 align-middle")}>
                     <div className="max-w-[280px] min-w-[140px] sm:min-w-[170px]">
                       <div className="flex items-center gap-2">
                         {newSinceIds.has(t.id) && (
@@ -379,11 +386,11 @@ export function TuneBrowser() {
                     </div>
                   </TableCell>
                   {showGameCol && (
-                    <TableCell className="px-2 py-3 sm:px-3">
+                    <TableCell className={cn(COL_X, "py-3")}>
                       <GameBadge game={t.game} />
                     </TableCell>
                   )}
-                  <TableCell className="px-2 py-3 sm:px-3">
+                  <TableCell className={cn(COL_X, "py-3")}>
                     {(() => {
                       const tags = t.madeFor
                         .split(/[\n/]/)
@@ -405,7 +412,7 @@ export function TuneBrowser() {
                       );
                     })()}
                   </TableCell>
-                  <TableCell className="px-2 py-3 sm:px-3">
+                  <TableCell className={cn(COL_X, "py-3")}>
                     {t.creators.length ? (
                       <div className="text-muted-foreground flex max-w-[160px] flex-col gap-0.5 text-xs sm:text-sm">
                         {t.creators.map((c, i) => (
@@ -418,7 +425,7 @@ export function TuneBrowser() {
                       <span className="text-muted-foreground text-xs sm:text-sm">—</span>
                     )}
                   </TableCell>
-                  <TableCell className="px-2 py-3 sm:px-3" onClick={(e) => e.stopPropagation()}>
+                  <TableCell className={cn(COL_X, "py-3")} onClick={(e) => e.stopPropagation()}>
                     {t.shareCodes.length ? (
                       <div className="flex flex-col items-start gap-1">
                         {t.shareCodes.map((c) => (
@@ -429,7 +436,10 @@ export function TuneBrowser() {
                       <span className="text-muted-foreground">—</span>
                     )}
                   </TableCell>
-                  <TableCell className="px-2 py-3 sm:px-3" onClick={(e) => e.stopPropagation()}>
+                  <TableCell
+                    className={cn(COL_X_LAST, "py-3")}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {t.videoUrl ? (
                       <a
                         href={t.videoUrl}
@@ -515,19 +525,18 @@ export function TuneBrowser() {
 function SortableHead({
   field,
   label,
-  shortLabel,
+  className,
 }: {
   field: SortField;
   label: string;
-  /** Narrower stand-in shown below sm, where the header sets the column width. */
-  shortLabel?: string;
+  className?: string;
 }) {
   const { filters, update } = useFilters();
   const active = filters.sort === field;
   return (
     <TableHead
       scope="col"
-      className="px-2 sm:px-3"
+      className={cn(COL_X, className)}
       aria-sort={active ? (filters.dir === "asc" ? "ascending" : "descending") : "none"}
     >
       <button
@@ -539,20 +548,12 @@ function SortableHead({
           })
         }
         title={`Sort by ${label.toLowerCase()}`}
-        aria-label={shortLabel ? `Sort by ${label.toLowerCase()}` : undefined}
         className={cn(
           "group -mx-1 inline-flex items-center gap-1 rounded px-1 py-1 font-medium transition-colors cursor-pointer hover:text-foreground",
           active ? "text-foreground" : "text-muted-foreground",
         )}
       >
-        {shortLabel ? (
-          <>
-            <span className="sm:hidden">{shortLabel}</span>
-            <span className="hidden sm:inline">{label}</span>
-          </>
-        ) : (
-          label
-        )}
+        {label}
         {active ? (
           filters.dir === "asc" ? (
             <ArrowUp className="size-3.5" />
