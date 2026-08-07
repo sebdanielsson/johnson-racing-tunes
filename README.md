@@ -62,3 +62,19 @@ redirect), so the proxy stays transparent.
 Deployed on [Vercel](https://vercel.com) — a static build, zero server runtime.
 The build command is `pnpm build:fresh`, which re-fetches the data and then runs
 `vite build` (output `dist/`).
+
+### Staying on the latest build
+
+The installed PWA is precached, so it keeps running whatever build it has — left
+to the browser, an app that is resumed rather than cold-started can sit on a
+weeks-old build (the commit in the footer says which one).
+[`src/hooks/use-app-update.ts`](src/hooks/use-app-update.ts) registers the
+service worker itself and checks for a new one on start, hourly while open, on
+resume and when connectivity returns. On a phone the resume check is the one
+that carries it — a suspended PWA doesn't run timers. Checks are best-effort —
+offline, the installed build simply keeps running.
+
+A new build only takes effect on reload, so it is applied when that can't
+interrupt: just after opening the app, while it is backgrounded, or on returning
+after 5+ minutes away. Filters and the open tune live in the URL, so the reload
+lands the user back where they were.
