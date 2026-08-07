@@ -219,6 +219,25 @@ export function TuneBrowser() {
           {results.length === 1 ? "tune" : "tunes"}
           {filterCount > 0 ? " match your filters" : " in the database"}
         </p>
+        {/* The count is hidden on mobile, so the view toggle takes the free left
+            edge instead of leaving a gap; from sm it rejoins the action cluster
+            at the end of the row. */}
+        <div className="flex overflow-hidden rounded-md border sm:order-last">
+          <ViewButton
+            active={filters.view === "table"}
+            onClick={() => update({ view: "table" })}
+            title="Table view"
+          >
+            <TableIcon className="size-4" />
+          </ViewButton>
+          <ViewButton
+            active={filters.view === "cards"}
+            onClick={() => update({ view: "cards" })}
+            title="Card view"
+          >
+            <LayoutGrid className="size-4" />
+          </ViewButton>
+        </div>
         <div className="ml-auto flex flex-wrap items-center gap-1.5">
           {codeCount > 0 && (
             <Button
@@ -283,22 +302,6 @@ export function TuneBrowser() {
               </Button>
             </>
           )}
-          <div className="flex overflow-hidden rounded-md border">
-            <ViewButton
-              active={filters.view === "table"}
-              onClick={() => update({ view: "table" })}
-              title="Table view"
-            >
-              <TableIcon className="size-4" />
-            </ViewButton>
-            <ViewButton
-              active={filters.view === "cards"}
-              onClick={() => update({ view: "cards" })}
-              title="Card view"
-            >
-              <LayoutGrid className="size-4" />
-            </ViewButton>
-          </div>
         </div>
       </div>
 

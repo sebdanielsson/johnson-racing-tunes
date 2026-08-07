@@ -78,8 +78,11 @@ function App() {
         {/* Content — view tabs + game selector share one wrapping row.
             The game selector scopes both Browse and Overview. */}
         <Tabs defaultValue="browse" className="gap-6">
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Game selector sits to the left — it scopes the Browse/Overview view. */}
+          {/* Mobile keeps the compact game dropdown and the view tabs on one
+              line. From sm the game pills claim the whole row, so the tabs drop
+              to a row of their own rather than trailing off the pills. */}
+          <div className="flex flex-wrap items-center gap-2 sm:flex-col sm:items-start sm:gap-3">
+            {/* Game selector comes first — it scopes the Browse/Overview view. */}
             <GameSwitcher />
             <TabsList>
               <TabsTrigger value="browse">
