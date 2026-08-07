@@ -25,8 +25,8 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      // The app registers the worker itself (see hooks/use-app-update.ts) so it
-      // can decide when to check for a new build and when to swap it in.
+      // The app registers the worker itself (see src/hooks/use-app-update.ts)
+      // so it can decide when to check for a new build and when to swap it in.
       registerType: "prompt",
       injectRegister: false,
       includeAssets: ["favicon.svg", "apple-touch-icon-180x180.png"],

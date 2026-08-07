@@ -66,7 +66,9 @@ export function useAppUpdate() {
       onRegisteredSW(_swUrl, r) {
         registration = r;
       },
-      // The reload is ours to time (see below), not the plugin's.
+      // Opting out of the plugin's own reload — without this callback it calls
+      // window.location.reload() itself the moment the new worker takes
+      // control, which would defeat the timing rules below.
       onNeedReload() {},
       onNeedRefresh() {
         // Fires twice for the same build (once on `installed`, once on
