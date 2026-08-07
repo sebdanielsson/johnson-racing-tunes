@@ -334,14 +334,14 @@ export function TuneBrowser() {
                 <SortableHead field="class" label="Class" />
                 <SortableHead field="car" label="Car" />
                 {showGameCol && <SortableHead field="game" label="Game" />}
-                <TableHead scope="col" className="px-2 sm:px-3">
+                <TableHead scope="col" className="px-1.5 sm:px-3">
                   Focus
                 </TableHead>
                 <SortableHead field="creator" label="Creator" />
-                <TableHead scope="col" className="px-2 sm:px-3">
+                <TableHead scope="col" className="px-1.5 sm:px-3">
                   Share code
                 </TableHead>
-                <TableHead scope="col" className="px-2 sm:px-3">
+                <TableHead scope="col" className="px-1.5 sm:px-3">
                   Video
                 </TableHead>
               </TableRow>
@@ -353,7 +353,7 @@ export function TuneBrowser() {
                   className="group cursor-pointer align-top"
                   onClick={() => setActive(t)}
                 >
-                  <TableCell className="px-2 py-3 sm:px-3">
+                  <TableCell className="px-1.5 py-3 sm:px-3">
                     <Badge variant="outline" className="font-semibold">
                       {t.class}
                     </Badge>
@@ -379,11 +379,11 @@ export function TuneBrowser() {
                     </div>
                   </TableCell>
                   {showGameCol && (
-                    <TableCell className="px-2 py-3 sm:px-3">
+                    <TableCell className="px-1.5 py-3 sm:px-3">
                       <GameBadge game={t.game} />
                     </TableCell>
                   )}
-                  <TableCell className="px-2 py-3 sm:px-3">
+                  <TableCell className="px-1.5 py-3 sm:px-3">
                     {(() => {
                       const tags = t.madeFor
                         .split(/[\n/]/)
@@ -405,7 +405,7 @@ export function TuneBrowser() {
                       );
                     })()}
                   </TableCell>
-                  <TableCell className="px-2 py-3 sm:px-3">
+                  <TableCell className="px-1.5 py-3 sm:px-3">
                     {t.creators.length ? (
                       <div className="text-muted-foreground flex max-w-[160px] flex-col gap-0.5 text-xs sm:text-sm">
                         {t.creators.map((c, i) => (
@@ -418,7 +418,7 @@ export function TuneBrowser() {
                       <span className="text-muted-foreground text-xs sm:text-sm">—</span>
                     )}
                   </TableCell>
-                  <TableCell className="px-2 py-3 sm:px-3" onClick={(e) => e.stopPropagation()}>
+                  <TableCell className="px-1.5 py-3 sm:px-3" onClick={(e) => e.stopPropagation()}>
                     {t.shareCodes.length ? (
                       <div className="flex flex-col items-start gap-1">
                         {t.shareCodes.map((c) => (
@@ -429,7 +429,7 @@ export function TuneBrowser() {
                       <span className="text-muted-foreground">—</span>
                     )}
                   </TableCell>
-                  <TableCell className="px-2 py-3 sm:px-3" onClick={(e) => e.stopPropagation()}>
+                  <TableCell className="px-1.5 py-3 sm:px-3" onClick={(e) => e.stopPropagation()}>
                     {t.videoUrl ? (
                       <a
                         href={t.videoUrl}
@@ -518,7 +518,7 @@ function SortableHead({ field, label }: { field: SortField; label: string }) {
   return (
     <TableHead
       scope="col"
-      className="px-2 sm:px-3"
+      className="px-1.5 sm:px-3"
       aria-sort={active ? (filters.dir === "asc" ? "ascending" : "descending") : "none"}
     >
       <button
