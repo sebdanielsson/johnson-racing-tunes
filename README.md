@@ -48,9 +48,14 @@ pnpm ui add <component> --diff   # show what the registry has that we don't
 pnpm ui add <component> --overwrite   # take the registry version
 ```
 
-`--overwrite` also rewrites the component's dependency ranges in `package.json`
-to whatever the registry declares — check `git diff package.json` afterwards and
-revert it if Renovate already has us on a newer version.
+Two things to watch after `--overwrite`:
+
+- It rewrites the component's dependency ranges in `package.json` to whatever
+  the registry declares — check `git diff package.json` and revert it if
+  Renovate already has us on a newer version.
+- It can re-add a `"use client"` directive that `--diff` then reports as drift
+  (the write path and the compare path disagree, and `rsc` is `false` here).
+  Drop the directive; `--diff` reporting no changes is what "in sync" means.
 
 ## Data
 
