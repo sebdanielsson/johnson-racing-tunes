@@ -22,7 +22,7 @@ and **Motorsport 7**, searchable, filterable and one tap to copy.
 
 - [Vite](https://vite.dev) + [React 19](https://react.dev) + TypeScript
 - [Tailwind CSS v4](https://tailwindcss.com)
-- [shadcn/ui](https://ui.shadcn.com) (new-york) + [shadcn charts](https://ui.shadcn.com/charts) / [Recharts](https://recharts.org)
+- [shadcn/ui](https://ui.shadcn.com) (base-nova) + [shadcn charts](https://ui.shadcn.com/charts) / [Recharts](https://recharts.org)
 - pnpm
 
 ## Development
@@ -34,6 +34,23 @@ pnpm build      # production build to dist/
 pnpm preview    # preview the production build
 pnpm typecheck  # type-check the project
 ```
+
+### UI components
+
+Everything in [`src/components/ui`](src/components/ui) is vendored from the
+shadcn registry **unmodified**, so upstream fixes can be pulled in without
+merging by hand. Anything app-specific belongs in `src/components/app` or in the
+props passed at the call site, not in the vendored file. To check for drift or
+pull an update:
+
+```bash
+pnpm ui add <component> --diff   # show what the registry has that we don't
+pnpm ui add <component> --overwrite   # take the registry version
+```
+
+`--overwrite` also rewrites the component's dependency ranges in `package.json`
+to whatever the registry declares — check `git diff package.json` afterwards and
+revert it if Renovate already has us on a newer version.
 
 ## Data
 
