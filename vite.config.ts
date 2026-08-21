@@ -22,7 +22,7 @@ export default defineConfig({
     __COMMIT_SHA__: JSON.stringify(commitSha()),
   },
   plugins: [
-    react(),
+    react({ compiler: true }),
     tailwindcss(),
     VitePWA({
       // The app registers the worker itself (see src/hooks/use-app-update.ts)
