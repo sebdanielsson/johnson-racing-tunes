@@ -74,10 +74,13 @@ export function classRank(cls: string): number {
  * find out. In dev, say so loudly instead; production still degrades rather than crashing. */
 if (import.meta.env.DEV) {
   const dangling = packed.rows.filter(
-    ([, , carIdx, mfIdx, creatorIdx]) =>
+    ([, , carIdx, mfIdx, creatorIdx, , , vIdx]) =>
       packed.cars[carIdx] === undefined ||
       packed.madeFor[mfIdx] === undefined ||
-      creatorIdx.some((ci) => packed.creators[ci] === undefined),
+      creatorIdx.some((ci) => packed.creators[ci] === undefined) ||
+      /* -1 is the "no video" sentinel; anything else has to resolve, or the mapping
+       * below quietly turns it into an empty videoTitle/videoUrl. */
+      (vIdx !== -1 && packed.videos[vIdx] === undefined),
   );
   if (dangling.length > 0) {
     console.error(
