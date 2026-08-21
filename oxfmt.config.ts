@@ -15,5 +15,5 @@ export default defineConfig({
   /* The only exclusion left, and it isn't a suppression: scripts/fetch-data.mjs writes this
    * with JSON.stringify() and no formatting, and Vercel regenerates it every deploy via
    * build:fresh — so formatting it here would make fmt:check fail on the build's own output. */
-  ignorePatterns: ["src/data/tunes.json"],
+  ignorePatterns: ["src/data/tunes.json", "src/components/ui/**"],
 });
