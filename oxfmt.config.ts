@@ -12,5 +12,8 @@ export default defineConfig({
    * Deliberately not pointing it at src/index.css: that makes sorting theme-aware and
    * reformats most components, which is a change for its own PR, not this one. */
   sortTailwindcss: {},
-  ignorePatterns: ["dist/**", "src/data/tunes.json", "src/components/ui/**", "pnpm-lock.yaml"],
+  /* The only exclusion left, and it isn't a suppression: scripts/fetch-data.mjs writes this
+   * with JSON.stringify() and no formatting, and Vercel regenerates it every deploy via
+   * build:fresh — so formatting it here would make fmt:check fail on the build's own output. */
+  ignorePatterns: ["src/data/tunes.json", "src/components/ui/**"],
 });

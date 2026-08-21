@@ -69,6 +69,27 @@ export function classRank(cls: string): number {
   return 9999;
 }
 
+/* The fallbacks below keep noUncheckedIndexedAccess happy, but a payload whose indices
+ * don't resolve is a generator bug, and blank cars or missing creators are a quiet way to
+ * find out. In dev, say so loudly instead; production still degrades rather than crashing. */
+if (import.meta.env.DEV) {
+  const dangling = packed.rows.filter(
+    ([, , carIdx, mfIdx, creatorIdx, , , vIdx]) =>
+      packed.cars[carIdx] === undefined ||
+      packed.madeFor[mfIdx] === undefined ||
+      creatorIdx.some((ci) => packed.creators[ci] === undefined) ||
+      /* -1 is the "no video" sentinel; anything else has to resolve, or the mapping
+       * below quietly turns it into an empty videoTitle/videoUrl. */
+      (vIdx !== -1 && packed.videos[vIdx] === undefined),
+  );
+  if (dangling.length > 0) {
+    console.error(
+      `tunes.json: ${dangling.length} row(s) reference indices that don't resolve. ` +
+        "Re-run `pnpm fetch-data` — the UI will show blanks until you do.",
+    );
+  }
+}
+
 /** The dataset baked at build time — used as the instant, offline-safe seed. */
 export const initialTunes: Tune[] = packed.rows.map((row, i) => {
   const [code, cls, carIdx, mfIdx, creatorIdx, shareCodes, info, vIdx, isNew] = row;
