@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "build:fresh": "node scripts/fetch-data.mjs && vite build",
     "fetch-data": "node scripts/fetch-data.mjs",
     "typecheck": "tsc -b",
