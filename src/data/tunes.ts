@@ -81,11 +81,15 @@ export const initialTunes: Tune[] = packed.rows.map((row, i) => {
     gameOrder: game.order,
     class: cls,
     classOrder: classRank(cls),
-    /* The indices come from the same packed payload, so these lookups always hit;
-     * the fallbacks exist to satisfy noUncheckedIndexedAccess without an assertion. */
+    /* The indices come from the same packed payload, so these lookups always hit; the
+     * fallbacks exist to satisfy noUncheckedIndexedAccess without an assertion.
+     * creators drops a miss rather than substituting "": computeFilterOptions flattens
+     * creators into selectable options and computeDerived counts the distinct set, so an
+     * empty string would surface as a blank, pickable filter and inflate the stat. car and
+     * madeFor are not built into options by value, so "" stays invisible there. */
     car: packed.cars[carIdx] ?? "",
     madeFor: packed.madeFor[mfIdx] ?? "",
-    creators: creatorIdx.map((ci) => packed.creators[ci] ?? ""),
+    creators: creatorIdx.flatMap((ci) => packed.creators[ci] ?? []),
     shareCodes,
     info,
     videoTitle: video?.[0] ?? "",
