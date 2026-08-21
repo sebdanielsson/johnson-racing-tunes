@@ -7,13 +7,14 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "preview": "vite preview",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "lint": "oxlint --deny-warnings",
+    "typecheck": "tsc -b",
+    "check": "pnpm run fmt:check && pnpm run lint && pnpm run typecheck",
     "build:fresh": "node scripts/fetch-data.mjs && vite build",
     "fetch-data": "node scripts/fetch-data.mjs",
-    "typecheck": "tsc -b",
-    "lint": "oxlint --deny-warnings",
-    "format": "oxfmt",
-    "format:check": "oxfmt --check",
-    "preview": "vite preview",
     "ui": "shadcn"
   },
   "dependencies": {
