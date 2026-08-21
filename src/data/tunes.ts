@@ -81,9 +81,11 @@ export const initialTunes: Tune[] = packed.rows.map((row, i) => {
     gameOrder: game.order,
     class: cls,
     classOrder: classRank(cls),
-    car: packed.cars[carIdx],
-    madeFor: packed.madeFor[mfIdx],
-    creators: creatorIdx.map((ci) => packed.creators[ci]),
+    /* The indices come from the same packed payload, so these lookups always hit;
+     * the fallbacks exist to satisfy noUncheckedIndexedAccess without an assertion. */
+    car: packed.cars[carIdx] ?? "",
+    madeFor: packed.madeFor[mfIdx] ?? "",
+    creators: creatorIdx.map((ci) => packed.creators[ci] ?? ""),
     shareCodes,
     info,
     videoTitle: video?.[0] ?? "",

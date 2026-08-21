@@ -14,7 +14,11 @@ const STALE_MS = 60 * 60 * 1000; // treat data older than 1 hour as stale
 export function useAutoRefresh() {
   const { lastUpdated } = useData();
   const lastUpdatedRef = React.useRef(lastUpdated);
-  lastUpdatedRef.current = lastUpdated;
+  /* Mirror into the ref from an effect rather than during render: the ref is only
+   * read from the interval and visibility handlers below, never while rendering. */
+  React.useEffect(() => {
+    lastUpdatedRef.current = lastUpdated;
+  }, [lastUpdated]);
 
   React.useEffect(() => {
     const refresh = () => {
