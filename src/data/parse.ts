@@ -81,7 +81,7 @@ export function parseCsv(text: string): string[][] {
 
 function findHeader(rows: string[][]): number {
   for (let i = 0; i < Math.min(rows.length, 20); i++) {
-    const cells = new Set(rows[i].map((x) => clean(x).toUpperCase()));
+    const cells = new Set((rows[i] ?? []).map((x) => clean(x).toUpperCase()));
     if ([...HEADER_CELLS].some((h) => cells.has(h)) && cells.has("CAR")) return i;
   }
   return 0;
@@ -118,9 +118,11 @@ export async function fetchAllTunes(signal?: AbortSignal): Promise<Tune[]> {
   const out: Tune[] = [];
   let idc = 0;
   csvByGame.forEach((rows, sheetIdx) => {
-    const [game, , code] = SHEET_SOURCES[sheetIdx];
+    const source = SHEET_SOURCES[sheetIdx];
+    if (!source) return;
+    const [game, , code] = source;
     const hi = findHeader(rows);
-    const m = colmap(rows[hi]);
+    const m = colmap(rows[hi] ?? []);
     let cur = "";
     for (const r of rows.slice(hi + 1)) {
       if (!r.some((c) => clean(c))) continue;
