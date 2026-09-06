@@ -49,7 +49,7 @@
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
-      "version": "11.22.0",
+      "version": "12.3.4",
       "onFail": "download"
     },
     "runtime": {
@@ -58,5 +58,5 @@
       "onFail": "download"
     }
   },
-  "packageManager": "pnpm@11.22.0"
+  "packageManager": "pnpm@12.3.4"
 }
