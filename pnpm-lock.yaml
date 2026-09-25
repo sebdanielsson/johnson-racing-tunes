@@ -225,7 +225,7 @@ importers:
         specifier: ^1.79.0
         version: 1.85.0(oxlint-tsgolint@7.0.2002)
       oxlint-tsgolint:
-        specifier: ^7.0.2001
+        specifier: ^7.0.2002
         version: 7.0.2002
       shadcn:
         specifier: ^4.18.0
